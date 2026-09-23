@@ -415,4 +415,4 @@ Then paste this file.
 - File storage (S3 / GCS)
 - Multi-tenant isolation
 - Audit log persistence
-- Trust reconciliation with real bank feed
+- Trust reconciliation with real bank feed 
