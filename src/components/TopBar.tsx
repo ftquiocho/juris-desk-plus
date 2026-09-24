@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Bell, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import UserMenu from "./UserMenu";
 import SearchBar from "./SearchBar";
+import NotificationBell from "./NotificationBell";
 
 export default function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -12,13 +13,7 @@ export default function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
       <div className="hidden md:flex h-full items-center justify-between px-6 gap-4">
         <SearchBar />
         <div className="flex items-center gap-3 shrink-0">
-          <button
-            className="relative text-muted hover:text-text p-2 rounded-lg hover:bg-surface-hover transition"
-            aria-label="Notifications"
-          >
-            <Bell size={18} />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full animate-pulse-glow" />
-          </button>
+          <NotificationBell />
           <UserMenu />
         </div>
       </div>
@@ -29,15 +24,15 @@ export default function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
           <>
             <button
               onClick={onMenuClick}
-              className="text-muted hover:text-text p-1 shrink-0"
+              className="icon-btn shrink-0"
               aria-label="Open menu"
             >
-              <Menu size={22} />
+              <Menu size={20} />
             </button>
             <div className="flex-1" />
             <button
               onClick={() => setMobileSearchOpen(true)}
-              className="text-muted hover:text-text p-2 rounded-lg hover:bg-surface-hover"
+              className="icon-btn"
               aria-label="Search"
             >
               <svg
@@ -54,13 +49,7 @@ export default function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
                 <path d="m21 21-4.3-4.3" />
               </svg>
             </button>
-            <button
-              className="relative text-muted hover:text-text p-2 rounded-lg hover:bg-surface-hover"
-              aria-label="Notifications"
-            >
-              <Bell size={18} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full animate-pulse-glow" />
-            </button>
+            <NotificationBell />
             <UserMenu />
           </>
         ) : (

@@ -12,6 +12,8 @@ export interface User {
   email: string;
   roles: Role[];
   title: string;
+  defaultRate?: number;
+  active?: boolean;
 }
 
 export interface Client {
@@ -58,6 +60,14 @@ export interface Matter {
   openedAt: string;
 }
 
+export interface DocumentVersion {
+  version: number;
+  uploadedBy: string;
+  uploadedAt: string;
+  status: "Draft" | "Pending Review" | "Approved" | "Rejected";
+  notes?: string;
+}
+
 export interface LegalDocument {
   id: string;
   matterId: string;
@@ -68,6 +78,7 @@ export interface LegalDocument {
   approvedBy?: string;
   confidential: boolean;
   createdAt: string;
+  versions?: DocumentVersion[];
 }
 
 export interface TimeEntry {
@@ -117,6 +128,59 @@ export interface AuditEvent {
   action: string;
   target: string;
   timestamp: string;
+}
+export type ContactType =
+  | "Opposing Party"
+  | "Opposing Counsel"
+  | "Court"
+  | "Prosecutor"
+  | "Expert Witness"
+  | "Process Server"
+  | "Notary Public"
+  | "Witness";
+
+export interface Contact {
+  id: string;
+  name: string;
+  type: ContactType;
+  email?: string;
+  phone?: string;
+  address?: string;
+  organization?: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface AppNotification {
+  id: string;
+  userId: string;
+  title: string;
+  body: string;
+  link?: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface Task {
+  id: string;
+  matterId: string;
+  title: string;
+  assignedTo: string;
+  dueDate: string;
+  status: "To Do" | "In Progress" | "Done" | "Blocked";
+  priority: "Low" | "Medium" | "High";
+  createdAt: string;
+}
+
+export interface Expense {
+  id: string;
+  matterId: string;
+  userId: string;
+  date: string;
+  category: string;
+  amount: number;
+  billable: boolean;
+  notes?: string;
 }
 
 export interface Delegation {

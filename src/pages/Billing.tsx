@@ -13,9 +13,11 @@ import {
   Plus,
   Send,
   DollarSign,
+  Printer,
 } from "lucide-react";
+import { printWindow } from "../lib/printWindow";
 
-const tabs = ["Overview", "Invoices", "Trust Ledger", "Reconciliation"] as const;
+const tabs = ["Overview", "Invoices", "Trust Ledger", "Rate Card", "Reconciliation"] as const;
 
 export default function Billing() {
   const [tab, setTab] = useState<(typeof tabs)[number]>("Overview");
@@ -31,6 +33,7 @@ export default function Billing() {
   const addTrustTransaction = useStore((s) => s.addTrustTransaction);
   const addAuditEvent = useStore((s) => s.addAuditEvent);
   const user = useStore((s) => s.currentUser)!;
+  const storeUsers = useStore((s) => s.users);
   const push = useToast((s) => s.push);
   const loading = useDelayedLoading();
 
@@ -128,6 +131,68 @@ export default function Billing() {
   };
 
   const lastRecon = reconciliations[0];
+  const handlePrint = () => {
+    const invoiceRows = invoices
+      .map((i) => {
+        const c = clients.find((x) => x.id === i.clientId);
+        return `
+          <tr>
+            <td>${i.id}</td>
+            <td>${c?.name ?? "—"}</td>
+            <td class="right">₱${i.amount.toLocaleString()}</td>
+            <td class="right">₱${i.trustApplied.toLocaleString()}</td>
+            <td>${i.dueDate}</td>
+            <td><span class="badge">${i.status}</span></td>
+          </tr>`;
+      })
+      .join("");
+
+    const trustRows = trustTransactions
+      .map((t) => {
+        const c = clients.find((x) => x.id === t.clientId);
+        return `
+          <tr>
+            <td>${t.date}</td>
+            <td>${t.reference}</td>
+            <td>${c?.name ?? "—"}</td>
+            <td>${t.description}</td>
+            <td class="right">${t.debit ? "₱" + t.debit.toLocaleString() : "—"}</td>
+            <td class="right">${t.credit ? "₱" + t.credit.toLocaleString() : "—"}</td>
+          </tr>`;
+      })
+      .join("");
+
+    const html = `
+      <div class="grid-3">
+        <div class="card"><div class="label">Unbilled Time</div><div class="value">₱${unbilledTotal.toLocaleString()}</div></div>
+        <div class="card"><div class="label">Trust Balance</div><div class="value">₱${trustBalance.toLocaleString()}</div></div>
+        <div class="card"><div class="label">Active Invoices</div><div class="value">${invoices.length}</div></div>
+      </div>
+
+      <h2>Invoices</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Invoice</th><th>Client</th><th class="right">Amount</th>
+            <th class="right">Trust</th><th>Due</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody>${invoiceRows}</tbody>
+      </table>
+
+      <h2>Trust Ledger — ${trustTransactions.length} transactions</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th><th>Ref</th><th>Client</th><th>Description</th>
+            <th class="right">Debit</th><th class="right">Credit</th>
+          </tr>
+        </thead>
+        <tbody>${trustRows}</tbody>
+      </table>`;
+
+    printWindow("Billing Report", html);
+  };
 
   return (
     <div className="space-y-6">
@@ -138,13 +203,22 @@ export default function Billing() {
             Invoices, trust ledger, reconciliation.
           </p>
         </div>
-        <button
-          onClick={() => setShowInvoiceModal(true)}
-          className="btn-primary flex items-center gap-2"
-        >
-          <Plus size={16} />
-          New Invoice
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handlePrint}
+            className="btn-secondary flex items-center gap-2 no-print"
+          >
+            <Printer size={16} />
+            Print
+          </button>
+          <button
+            onClick={() => setShowInvoiceModal(true)}
+            className="btn-primary flex items-center gap-2"
+          >
+            <Plus size={16} />
+            New Invoice
+          </button>
+        </div>
       </div>
 
       <div className="border-b border-border flex gap-1 overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
@@ -308,6 +382,47 @@ export default function Billing() {
                     </td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {tab === "Rate Card" && (
+        <div className="card !p-0 overflow-hidden">
+          <div className="p-4 border-b border-border">
+            <h2 className="font-semibold flex items-center gap-2">
+              <DollarSign size={16} className="text-primary" />
+              Firm Rate Card
+            </h2>
+            <p className="text-xs text-muted mt-1">
+              Default billing rates. Only Admin and Managing Partner can edit
+              (Admin → Rates).
+            </p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-surface border-b border-border">
+                <tr className="text-left text-muted text-xs uppercase tracking-wider">
+                  <th className="py-3 px-4">User</th>
+                  <th className="py-3 px-4">Title</th>
+                  <th className="py-3 px-4 text-right">Rate (₱/hr)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {storeUsers
+                  .filter((u) => u.defaultRate)
+                  .map((u) => (
+                    <tr key={u.id} className="border-b border-border">
+                      <td className="py-3 px-4 font-medium">{u.name}</td>
+                      <td className="py-3 px-4 text-xs text-muted">
+                        {u.title}
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono">
+                        ₱{(u.defaultRate ?? 0).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>

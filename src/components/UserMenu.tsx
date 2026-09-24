@@ -53,7 +53,7 @@ export default function UserMenu() {
       {/* Trigger */}
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 md:gap-3 px-1.5 py-1.5 rounded-lg hover:bg-surface-hover transition-colors"
+        className="flex items-center gap-2 md:gap-3 px-1.5 py-1.5 rounded-lg hover:bg-surface-hover active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-primary/40"
         aria-label="User menu"
       >
         <div className="hidden md:block text-right">

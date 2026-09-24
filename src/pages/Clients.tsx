@@ -4,6 +4,9 @@ import { useStore } from "../store/useStore";
 import { Search, Building2, User, Upload, ArrowUpDown, ChevronDown, ChevronUp, X } from "lucide-react";
 import StatusBadge from "../components/StatusBadge";
 import ImportClientsModal from "../components/ImportClientsModal";
+import NewMatterModal from "../components/NewMatterModal";
+import EditClientModal from "../components/EditClientModal";
+import { Plus, Pencil } from "lucide-react";
 import { useDelayedLoading } from "../hooks/useDelayedLoading";
 import { SkeletonList } from "../components/Skeleton";
 
@@ -33,6 +36,8 @@ export default function Clients() {
   const [perPage, setPerPage] = useState(20);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showImport, setShowImport] = useState(false);
+  const [newMatterForClient, setNewMatterForClient] = useState<string | null>(null);
+  const [editClientId, setEditClientId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -387,12 +392,21 @@ export default function Clients() {
                         </p>
                       </div>
                     </div>
-                    <button
-                      onClick={() => setExpandedId(null)}
-                      className="text-muted hover:text-text p-1 shrink-0"
-                    >
-                      <X size={20} />
-                    </button>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => setEditClientId(c.id)}
+                        className="btn-secondary text-xs py-1 px-2 flex items-center gap-1"
+                      >
+                        <Pencil size={12} />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => setExpandedId(null)}
+                        className="text-muted hover:text-text p-1"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -448,9 +462,18 @@ export default function Clients() {
                     </Section>
 
                     <div>
-                      <p className="text-[10px] uppercase tracking-wider text-muted mb-2">
-                        Matters ({clientMatters.length})
-                      </p>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] uppercase tracking-wider text-muted">
+                          Matters ({clientMatters.length})
+                        </p>
+                        <button
+                          onClick={() => setNewMatterForClient(c.id)}
+                          className="btn-secondary text-xs py-1 px-2 flex items-center gap-1"
+                        >
+                          <Plus size={12} />
+                          New Matter
+                        </button>
+                      </div>
                       {clientMatters.length === 0 ? (
                         <p className="text-sm text-muted">No matters yet.</p>
                       ) : (
@@ -486,6 +509,24 @@ export default function Clients() {
       {showImport && (
         <ImportClientsModal onClose={() => setShowImport(false)} />
       )}
+
+      {newMatterForClient && (
+        <NewMatterModal
+          preselectedClientId={newMatterForClient}
+          onClose={() => setNewMatterForClient(null)}
+        />
+      )}
+
+      {editClientId && (() => {
+        const c = clients.find((x) => x.id === editClientId);
+        if (!c) return null;
+        return (
+          <EditClientModal
+            client={c}
+            onClose={() => setEditClientId(null)}
+          />
+        );
+      })()}
     </div>
   );
 }

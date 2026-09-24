@@ -11,6 +11,8 @@ import Admin from "./pages/Admin";
 import AuditLog from "./pages/AuditLog";
 import Reports from "./pages/Reports";
 import Clients from "./pages/Clients";
+import Matters from "./pages/Matters";
+import Contacts from "./pages/Contacts";
 import ConflictCheck from "./pages/ConflictCheck";
 import Calendar from "./pages/Calendar";
 import Tasks from "./pages/Tasks";
@@ -41,6 +43,8 @@ export default function App() {
         <Route path="/audit" element={<AuditLog />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/clients" element={<Clients />} />
+        <Route path="/matters" element={<Matters />} />
+        <Route path="/contacts" element={<Contacts />} />
         <Route path="/conflict" element={<ConflictCheck />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/tasks" element={<Tasks />} />

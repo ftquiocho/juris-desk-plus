@@ -8,8 +8,10 @@ import type { Invoice } from "../types";
 export default function InvoiceModal({ onClose }: { onClose: () => void }) {
   const matters = useStore((s) => s.matters);
   const timeEntries = useStore((s) => s.timeEntries);
+  const expenses = useStore((s) => s.expenses);
   const trustTransactions = useStore((s) => s.trustTransactions);
   const billedTimeEntryIds = useStore((s) => s.billedTimeEntryIds);
+  const billedExpenseIds = useStore((s) => s.billedExpenseIds);
   const createInvoice = useStore((s) => s.createInvoice);
   const addAuditEvent = useStore((s) => s.addAuditEvent);
   const user = useStore((s) => s.currentUser)!;
@@ -52,7 +54,33 @@ export default function InvoiceModal({ onClose }: { onClose: () => void }) {
     endDate,
   ]);
 
-  const subtotal = unbilledEntries.reduce((s, t) => s + t.duration * t.rate, 0);
+  const unbilledExpenses = useMemo(() => {
+    return expenses.filter(
+      (e) =>
+        e.billable &&
+        !billedExpenseIds.includes(e.id) &&
+        clientMatters.some((m) => m.id === e.matterId) &&
+        (!selectedMatterIds.length ||
+          selectedMatterIds.includes(e.matterId)) &&
+        (!startDate || e.date >= startDate) &&
+        (!endDate || e.date <= endDate)
+    );
+  }, [
+    expenses,
+    billedExpenseIds,
+    clientMatters,
+    selectedMatterIds,
+    startDate,
+    endDate,
+  ]);
+
+  const timeSubtotal = unbilledEntries.reduce(
+    (s, t) => s + t.duration * t.rate,
+    0
+  );
+  const expenseSubtotal = unbilledExpenses.reduce((s, e) => s + e.amount, 0);
+  const subtotal = timeSubtotal + expenseSubtotal;
+
   const trustBalance = trustTransactions
     .filter((t) => t.clientId === clientId)
     .reduce((s, t) => s + t.credit - t.debit, 0);
@@ -72,7 +100,8 @@ export default function InvoiceModal({ onClose }: { onClose: () => void }) {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!clientId || unbilledEntries.length === 0) return;
+    if (!clientId || unbilledEntries.length + unbilledExpenses.length === 0)
+      return;
 
     const invoice: Invoice = {
       id: `INV-${String(Date.now()).slice(-4)}`,
@@ -90,7 +119,8 @@ export default function InvoiceModal({ onClose }: { onClose: () => void }) {
 
     createInvoice(
       invoice,
-      unbilledEntries.map((t) => t.id)
+      unbilledEntries.map((t) => t.id),
+      unbilledExpenses.map((e) => e.id)
     );
 
     addAuditEvent({
@@ -104,6 +134,8 @@ export default function InvoiceModal({ onClose }: { onClose: () => void }) {
     push(`Invoice ${invoice.id} created for ₱${total.toLocaleString()}.`);
     onClose();
   };
+
+  const totalLineItems = unbilledEntries.length + unbilledExpenses.length;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4">
@@ -208,10 +240,10 @@ export default function InvoiceModal({ onClose }: { onClose: () => void }) {
               <div className="card !p-0 overflow-hidden">
                 <div className="p-3 border-b border-border">
                   <h3 className="font-semibold text-sm">
-                    Line Items ({unbilledEntries.length})
+                    Line Items ({totalLineItems})
                   </h3>
                 </div>
-                {unbilledEntries.length === 0 ? (
+                {totalLineItems === 0 ? (
                   <p className="p-4 text-sm text-muted text-center">
                     No unbilled entries in this period.
                   </p>
@@ -221,7 +253,7 @@ export default function InvoiceModal({ onClose }: { onClose: () => void }) {
                       <thead>
                         <tr className="text-left text-muted border-b border-border">
                           <th className="py-2 px-3">Date</th>
-                          <th className="py-2 px-3">Activity</th>
+                          <th className="py-2 px-3">Item</th>
                           <th className="py-2 px-3 text-right">Hours</th>
                           <th className="py-2 px-3 text-right">Rate</th>
                           <th className="py-2 px-3 text-right">Amount</th>
@@ -240,6 +272,22 @@ export default function InvoiceModal({ onClose }: { onClose: () => void }) {
                             </td>
                             <td className="py-2 px-3 text-right font-medium">
                               ₱{(t.duration * t.rate).toLocaleString()}
+                            </td>
+                          </tr>
+                        ))}
+                        {unbilledExpenses.map((e) => (
+                          <tr key={e.id} className="border-b border-border">
+                            <td className="py-2 px-3 text-xs">{e.date}</td>
+                            <td className="py-2 px-3">
+                              {e.category}{" "}
+                              <span className="text-muted text-xs">
+                                (expense)
+                              </span>
+                            </td>
+                            <td className="py-2 px-3 text-right">—</td>
+                            <td className="py-2 px-3 text-right">—</td>
+                            <td className="py-2 px-3 text-right font-medium">
+                              ₱{e.amount.toLocaleString()}
                             </td>
                           </tr>
                         ))}
@@ -306,7 +354,9 @@ export default function InvoiceModal({ onClose }: { onClose: () => void }) {
         <div className="p-4 border-t border-border flex gap-3">
           <button
             onClick={submit}
-            disabled={!clientId || unbilledEntries.length === 0}
+            disabled={
+              !clientId || unbilledEntries.length + unbilledExpenses.length === 0
+            }
             className="btn-primary flex-1 disabled:opacity-40"
           >
             Create Invoice

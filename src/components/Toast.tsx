@@ -28,7 +28,7 @@ export default function ToastContainer() {
   const remove = useToast((s) => s.remove);
 
   return (
-    <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 space-y-2 z-50 max-w-[calc(100vw-2rem)] md:max-w-sm">
+    <div className="no-print fixed bottom-4 right-4 md:bottom-6 md:right-6 space-y-2 z-50 max-w-[calc(100vw-2rem)] md:max-w-sm">
       {toasts.map((t) => (
         <div
           key={t.id}

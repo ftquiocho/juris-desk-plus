@@ -16,17 +16,43 @@ export default function Approvals() {
   const pending = documents.filter((d) => d.status === "Pending Review");
   const loading = useDelayedLoading();
 
+  const addNotification = useStore((s) => s.addNotification);
+
   const handleApprove = (id: string) => {
+    const doc = documents.find((d) => d.id === id);
     approveDocument(id, user.id);
     addAuditEvent({ id: `LOG-${Date.now()}`, userId: user.id, action: "Approved document", target: id, timestamp: new Date().toISOString() });
     push("Document approved and saved to matter.");
+    if (doc) {
+      addNotification({
+        id: `NOT-${Date.now()}`,
+        userId: doc.uploadedBy,
+        title: "Document approved",
+        body: `"${doc.title}" was approved by ${user.name}.`,
+        link: `/matters/${doc.matterId}`,
+        read: false,
+        createdAt: new Date().toISOString(),
+      });
+    }
   };
 
   const handleReject = (id: string) => {
-  rejectDocument(id);
-  addAuditEvent({ id: `LOG-${Date.now()}`, userId: user.id, action: "Rejected document", target: id, timestamp: new Date().toISOString() });
-  push("Document rejected. Submitter notified.", "info");
-};
+    const doc = documents.find((d) => d.id === id);
+    rejectDocument(id);
+    addAuditEvent({ id: `LOG-${Date.now()}`, userId: user.id, action: "Rejected document", target: id, timestamp: new Date().toISOString() });
+    push("Document rejected. Submitter notified.", "info");
+    if (doc) {
+      addNotification({
+        id: `NOT-${Date.now()}`,
+        userId: doc.uploadedBy,
+        title: "Document rejected",
+        body: `"${doc.title}" was rejected by ${user.name}. Please review and resubmit.`,
+        link: `/matters/${doc.matterId}`,
+        read: false,
+        createdAt: new Date().toISOString(),
+      });
+    }
+  };
 
   return (
     <div>

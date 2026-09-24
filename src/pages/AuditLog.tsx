@@ -2,15 +2,60 @@ import { useStore } from "../store/useStore";
 import { users } from "../data";
 import { useDelayedLoading } from "../hooks/useDelayedLoading";
 import { SkeletonList } from "../components/Skeleton";
+import { printWindow } from "../lib/printWindow";
+import { Printer } from "lucide-react";
 
 export default function AuditLog() {
   const auditLog = useStore((s) => s.auditLog);
   const loading = useDelayedLoading();
+  const handlePrint = () => {
+    const rows = auditLog
+      .map((e) => {
+        const u = users.find((x) => x.id === e.userId);
+        return `
+          <tr>
+            <td>${new Date(e.timestamp).toLocaleString()}</td>
+            <td>${u?.name ?? e.userId}</td>
+            <td>${e.action}</td>
+            <td>${e.target}</td>
+          </tr>`;
+      })
+      .join("");
+
+    const html = `
+      <h2>Audit Log — ${auditLog.length} event${auditLog.length === 1 ? "" : "s"}</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>Target</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows || '<tr><td colspan="4" class="muted">No events recorded.</td></tr>'}
+        </tbody>
+      </table>`;
+
+    printWindow("Audit Log Report", html);
+  };
 
   return (
     <div>
-      <h1 className="text-xl md:text-2xl font-bold mb-1">Audit Log</h1>
-      <p className="text-sm text-muted mb-6">All sensitive actions are recorded here.</p>
+      <div className="flex items-start md:items-center justify-between gap-3 flex-wrap mb-6">
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold mb-1">Audit Log</h1>
+          <p className="text-sm text-muted">All sensitive actions are recorded here.</p>
+        </div>
+        <button
+          onClick={handlePrint}
+          className="btn-secondary flex items-center gap-2 no-print"
+        >
+          <Printer size={16} />
+          Print Report
+        </button>
+      </div>
 
       {loading ? (
         <SkeletonList rows={5} />

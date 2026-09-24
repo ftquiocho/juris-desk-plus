@@ -12,6 +12,8 @@ import {
   X,
   BarChart3,
   Users,
+  Briefcase,
+  Contact as ContactIcon,
 } from "lucide-react";
 import { useStore } from "../store/useStore";
 import { can } from "../lib/permissions";
@@ -24,11 +26,13 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     { to: "/", label: "Dashboard", icon: LayoutDashboard, perm: null },
     { to: "/intake", label: "Client Intake", icon: FilePlus2, perm: "intake:create" as const },
     { to: "/clients", label: "Clients", icon: Users, perm: "client:read" as const },
+    { to: "/matters", label: "Matters", icon: Briefcase, perm: "matter:read" as const },
+    { to: "/contacts", label: "Contacts", icon: ContactIcon, perm: null },
     { to: "/conflict", label: "Conflict Check", icon: ShieldCheck, perm: "conflict:run" as const },
     { to: "/calendar", label: "Calendar", icon: CalIcon, perm: null },
     { to: "/tasks", label: "Tasks", icon: CheckSquare, perm: null },
     { to: "/approvals", label: "Approvals", icon: CheckSquare, perm: "document:approve" as const },
-    { to: "/time", label: "Time Tracker", icon: Clock, perm: "time:create" as const },
+    { to: "/time", label: "Time & Expenses", icon: Clock, perm: "time:create" as const },
     { to: "/billing", label: "Billing", icon: DollarSign, perm: "billing:view" as const },
     { to: "/reports", label: "Reports", icon: BarChart3, perm: "report:financial" as const },
     { to: "/admin", label: "Admin", icon: Settings, perm: "user:manage" as const },
@@ -54,7 +58,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
         </div>
         <button
           onClick={onClose}
-          className="md:hidden text-muted hover:text-text p-1"
+          className="md:hidden icon-btn"
           aria-label="Close menu"
         >
           <X size={20} />
@@ -64,7 +68,10 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
       {/* Nav */}
       <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
         {items.map((it) => {
-          const allowed = !it.perm || can(user.roles, it.perm);
+          const allowed =
+            it.to === "/admin"
+              ? can(user.roles, "user:manage") || can(user.roles, "rate:manage")
+              : !it.perm || can(user.roles, it.perm);
           const Icon = it.icon;
           return (
             <NavLink

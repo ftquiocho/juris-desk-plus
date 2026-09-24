@@ -7,6 +7,7 @@ export const users: User[] = [
     email: "matt@nelsonmurdock.ph",
     roles: ["MNG_PARTNER", "ATTORNEY"],
     title: "Co-Founder / Managing Partner",
+    defaultRate: 3500,
   },
   {
     id: "USR-002",
@@ -14,6 +15,7 @@ export const users: User[] = [
     email: "foggy@nelsonmurdock.ph",
     roles: ["MNG_PARTNER", "ATTORNEY"],
     title: "Co-Founder / Managing Partner",
+    defaultRate: 3500,
   },
   {
     id: "USR-003",
@@ -21,6 +23,7 @@ export const users: User[] = [
     email: "karen@nelsonmurdock.ph",
     roles: ["PARALEGAL"],
     title: "Office Manager / Paralegal",
+    defaultRate: 1500,
   },
   {
     id: "USR-004",
@@ -28,6 +31,7 @@ export const users: User[] = [
     email: "marci@nelsonmurdock.ph",
     roles: ["ATTORNEY"],
     title: "Senior Associate",
+    defaultRate: 2500,
   },
   {
     id: "USR-005",
@@ -35,6 +39,7 @@ export const users: User[] = [
     email: "blake@nelsonmurdock.ph",
     roles: ["ATTORNEY"],
     title: "Of Counsel",
+    defaultRate: 4000,
   },
   {
     id: "USR-006",

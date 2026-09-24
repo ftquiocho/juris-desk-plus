@@ -19,11 +19,13 @@ export type Permission =
   | "report:financial"
   | "intake:create"
   | "conflict:run"
-  | "client:read";
+  | "client:read"
+  | "rate:manage";
 
 const rolePermissions: Record<Role, Permission[]> = {
   SYS_ADMIN: [
     "user:manage",
+    "rate:manage",
     "audit:read",
     "matter:read",
     "document:upload",
@@ -47,6 +49,7 @@ const rolePermissions: Record<Role, Permission[]> = {
     "time:approve",
     "invoice:approve",
     "billing:view",
+    "rate:manage",
     "trust:read",
     "report:financial",
     "intake:create",
@@ -84,6 +87,7 @@ const rolePermissions: Record<Role, Permission[]> = {
     "invoice:create",
     "invoice:approve",
     "billing:view",
+    "rate:manage",
     "trust:read",
     "report:financial",
     "matter:read",

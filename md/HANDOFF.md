@@ -5,7 +5,9 @@
 **Demo Firm:** Nelson & Murdock Law Offices  
 **Stack:** React 18 + Vite + TypeScript + TailwindCSS + Zustand + React Router + Recharts  
 **Devices:** Mobile-first (phones → tablets → desktop)  
-**Status:** Feature complete — A through K done
+**Status:** Feature complete — A through W done
+
+
 ---
 
 ## How to Run
@@ -46,6 +48,7 @@ juris-desk-plus/
     ├── lib/
     │   └── permissions.ts        # RBAC (can() function)
     │   └── csv.ts                # CSV parser + template download
+    │   ├── printWindow.ts         # Reliable print via new-window HTML
     ├── hooks/
     │   └── useDelayedLoading.ts  # Simulated loading for demo
     ├── data/                     # Nelson & Murdock seed data
@@ -57,6 +60,7 @@ juris-desk-plus/
     │   ├── timeEntries.ts        # 19 time entries
     │   ├── invoices.ts           # 5 invoices
     │   └── trust.ts              # 7 trust transactions
+    │   ├── tasks.ts              # Seed tasks
     ├── components/
     │   ├── Layout.tsx            # Shell + mobile drawer + page transitions
     │   ├── Sidebar.tsx           # RBAC-aware nav (auto-closes on mobile tap)
@@ -74,6 +78,8 @@ juris-desk-plus/
     │   ├── ImportClientsModal.tsx # CSV import with preview
     │   ├── SearchBar.tsx
     │   ├── InvoiceModal.tsx
+    │   ├── NewMatterModal.tsx    # Create matter
+    │   ├── TaskModal.tsx          # Create task
     └── pages/
         ├── Login.tsx             # Demo user picker
         ├── Dashboard.tsx         # Role-aware KPIs + matters
@@ -90,6 +96,7 @@ juris-desk-plus/
         ├── Admin.tsx             # Users & roles
         ├── Profile.tsx           # User profile page
         ├── AuditLog.tsx          # Action history
+        ├── Matters.tsx           # Matter list + new matter
 
 ```
 
@@ -133,6 +140,17 @@ juris-desk-plus/
 | 33 | **M. CSV import (Level 1)** | `ImportClientsModal.tsx`, `csv.ts` | ✅ |
 | 34 | **N. Clients table (heavy data)** | `Clients.tsx` | ✅ |
 | 35 | **O. Intake sectioned form** | `Intake.tsx` | ✅ |
+| 36 | **P. New Matter** (modal + Matters page + client drawer button) | `NewMatterModal.tsx`, `Matters.tsx` | ✅ |
+| 37 | **Q. Task creation** | `TaskModal.tsx`, `Tasks.tsx` | ✅ |
+| 38 | **Q. Expense tracking** | `TimeTracker.tsx`, `InvoiceModal.tsx` | ✅ |
+| 39 | **R. Per-user default rates** | `types.ts`, `users.ts`, `TimeTracker.tsx` | ✅ (foundation) |
+| 40 | **S. Rates Management** | `Admin.tsx` (Rates tab), `Billing.tsx` (Rate Card tab) | ✅ |
+| 41 | **T. Matter Closure** | `MatterWorkspace.tsx` | ✅ |
+| 42 | **Dashboard sort + grid/list toggle** | `Dashboard.tsx` | ✅ |
+| 43 | **V. Notifications** | `NotificationBell.tsx`, store | ✅ |
+| 44 | **W. Admin user management** | `UserFormModal.tsx`, `Admin.tsx` | ✅ |
+| 45 | **Button UI polish** | `index.css` (`.icon-btn`) | ✅ |
+| 49 | **Z2. Reliable print** (new-tab HTML) | `printWindow.ts` | ✅ |
 
 ---
 
@@ -251,6 +269,7 @@ can(roles: Role[], permission: Permission): boolean
 | `BILLING` | ✅ | — | ✅ | — | ✅ | ✅ | — | — | — |
 
 Sidebar items are dimmed (not hidden) when permission is missing, with tooltip.
+**Sidebar item order:** Dashboard · Client Intake · Clients · Matters · Conflict Check · Calendar · Tasks · Approvals · Time Tracker · Billing · Reports · Admin · Audit Log
 
 ---
 
@@ -384,6 +403,17 @@ Then paste this file.
 | 2026-09-23 | Feature M — CSV import with template download + duplicate detection |
 | 2026-09-23 | Feature N — Clients list: paginated table, sortable columns, per-page selector, detail drawer |
 | 2026-09-23 | Feature O — Intake form split into 4 sections with sticky action bar |
+| 2026-09-23 | Feature P — New Matter: modal + Matters list page + Create-from-client drawer button |
+| 2026-09-23 | Feature Q — Task creation + Expense tracking, invoice includes expenses |
+| 2026-09-23 | Feature R — Per-user default rates (auto-fill in Time Tracker) |
+| 2026-09-23 | Feature S — Rates Management (Admin edit + Billing rate card + live auto-fill) |
+| 2026-09-23 | Feature T — Matter Closure with trust/unpaid warnings |
+| 2026-09-23 | Dashboard — Sort dropdown + grid/list toggle |
+| 2026-09-24 | Feature V — Notifications with read/unread, mark-all, clear-all |
+| 2026-09-24 | Feature W — Admin user CRUD: add, edit, deactivate, reactivate |
+| 2026-09-24 | UI — `.icon-btn` classes for consistent icon-button affordance |
+| 2026-09-24 | Fix Z — Print now opens a clean HTML page in a new tab (Chrome print preview fix) |
+
 
 ---
 
@@ -416,3 +446,15 @@ Then paste this file.
 - Multi-tenant isolation
 - Audit log persistence
 - Trust reconciliation with real bank feed 
+
+- **Rates management tab** — Billing/Admin UI to edit per-user rates
+- Task assignment notifications
+- Recurring tasks
+- Billable expense markup (%)
+
+- Notifications system
+- Admin user management (create/deactivate/reset)
+- Contact management (opposing counsel, courts, experts)
+- Document versioning UI
+- PDF export
+- Edit modes for clients/matters/tasks/expenses
