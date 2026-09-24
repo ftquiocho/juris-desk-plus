@@ -2,25 +2,93 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ══════════════════════════════════════════════
+   THEME TOKENS
+   ══════════════════════════════════════════════ */
+
+:root,
+:root[data-theme="dark"] {
+  --bg: 10 10 10;
+  --surface: 20 20 20;
+  --surface-hover: 28 28 28;
+  --elevated: 26 26 26;
+  --border: 38 38 38;
+  --edge: 51 51 51;
+  --text: 250 250 250;
+  --muted: 139 139 139;
+  --primary: 220 38 38;
+  --primary-hover: 185 28 28;
+  --primary-dark: 127 29 29;
+  --primary-light: 42 15 15;
+  --success: 34 197 94;
+  --success-light: 15 42 24;
+  --warning: 245 158 11;
+  --warning-light: 42 31 10;
+  --danger: 239 68 68;
+  --danger-light: 42 12 12;
+  --info: 59 130 246;
+  --info-light: 15 26 42;
+}
+
+:root[data-theme="light"] {
+  --bg: 248 250 252;
+  --surface: 255 255 255;
+  --surface-hover: 241 245 249;
+  --elevated: 255 255 255;
+  --border: 226 232 240;
+  --edge: 203 213 225;
+  --text: 15 23 42;
+  --muted: 100 116 139;
+  --primary: 220 38 38;
+  --primary-hover: 185 28 28;
+  --primary-dark: 127 29 29;
+  --primary-light: 254 226 226;
+  --success: 22 163 74;
+  --success-light: 220 252 231;
+  --warning: 202 138 4;
+  --warning-light: 254 249 195;
+  --danger: 185 28 28;
+  --danger-light: 254 226 226;
+  --info: 37 99 235;
+  --info-light: 239 246 255;
+}
+
 * {
   color-scheme: dark;
 }
 
+:root[data-theme="light"] * {
+  color-scheme: light;
+}
+
 body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
-  background-color: #0A0A0A;
-  color: #FAFAFA;
+  background-color: rgb(var(--bg));
+  color: rgb(var(--text));
   -webkit-font-smoothing: antialiased;
+  background-attachment: fixed;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+:root[data-theme="dark"] body {
   background-image:
     radial-gradient(circle at 20% 0%, rgba(220, 38, 38, 0.06), transparent 50%),
     radial-gradient(circle at 80% 100%, rgba(220, 38, 38, 0.04), transparent 50%);
-  background-attachment: fixed;
 }
 
-/* Card */
+:root[data-theme="light"] body {
+  background-image:
+    radial-gradient(circle at 20% 0%, rgba(220, 38, 38, 0.04), transparent 50%),
+    radial-gradient(circle at 80% 100%, rgba(220, 38, 38, 0.02), transparent 50%);
+}
+
+/* ══════════════════════════════════════════════
+   COMPONENTS
+   ══════════════════════════════════════════════ */
+
 .card {
   @apply bg-surface rounded-xl border border-border p-4 md:p-5;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.6), 0 1px 2px -1px rgb(0 0 0 / 0.5);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06);
 }
 
 .card-hover {
@@ -29,10 +97,9 @@ body {
 
 .card-hover:hover {
   @apply border-edge;
-  box-shadow: 0 4px 16px 0 rgb(220 38 38 / 0.12), 0 2px 4px 0 rgb(0 0 0 / 0.5);
+  box-shadow: 0 4px 16px 0 rgb(220 38 38 / 0.12), 0 2px 4px 0 rgb(0 0 0 / 0.08);
 }
 
-/* Buttons */
 .btn-primary {
   @apply bg-primary text-white px-4 py-2 rounded-lg font-medium transition-all duration-150
          hover:bg-primary-hover
@@ -56,7 +123,7 @@ body {
 
 .btn-danger {
   @apply bg-transparent text-danger border border-danger/40 px-4 py-2 rounded-lg font-medium transition-all duration-150
-         hover:bg-danger/10 hover:border-danger
+         hover:bg-danger-light hover:border-danger
          active:scale-[0.98]
          disabled:opacity-40 disabled:cursor-not-allowed
          focus:outline-none focus:ring-2 focus:ring-danger/40;
@@ -68,7 +135,6 @@ body {
          active:bg-surface;
 }
 
-/* Inputs */
 .input {
   @apply w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text transition-all duration-150
          placeholder:text-muted
@@ -86,20 +152,22 @@ select.input {
 }
 
 input[type="date"].input::-webkit-calendar-picker-indicator {
-  filter: invert(0.7);
+  filter: invert(0.5);
   cursor: pointer;
+}
+
+:root[data-theme="dark"] input[type="date"].input::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
 }
 
 .label {
   @apply block text-sm font-medium text-text mb-1.5;
 }
 
-/* Badges */
 .badge {
   @apply inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full border;
 }
 
-/* Icon-only buttons — clear affordance */
 .icon-btn {
   @apply inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted transition-all
          hover:bg-surface-hover hover:text-text
@@ -119,14 +187,17 @@ input[type="date"].input::-webkit-calendar-picker-indicator {
   @apply w-7 h-7;
 }
 
-/* Loading skeleton */
+/* ══════════════════════════════════════════════
+   LOADING
+   ══════════════════════════════════════════════ */
+
 .skeleton {
   @apply rounded-md bg-surface-hover;
   background-image: linear-gradient(
     90deg,
-    rgba(28, 28, 28, 0) 0px,
-    rgba(51, 51, 51, 0.7) 40px,
-    rgba(28, 28, 28, 0) 80px
+    rgba(120, 120, 120, 0) 0px,
+    rgba(120, 120, 120, 0.15) 40px,
+    rgba(120, 120, 120, 0) 80px
   );
   background-size: 400px 100%;
   background-repeat: no-repeat;
@@ -138,7 +209,10 @@ input[type="date"].input::-webkit-calendar-picker-indicator {
   100% { background-position: 400px 0; }
 }
 
-/* Scrollbar */
+/* ══════════════════════════════════════════════
+   SCROLLBAR
+   ══════════════════════════════════════════════ */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -147,13 +221,17 @@ input[type="date"].input::-webkit-calendar-picker-indicator {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-border rounded-full;
+  background: rgb(var(--border));
+  border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-edge;
+  background: rgb(var(--edge));
 }
 
-/* Page transition */
+/* ══════════════════════════════════════════════
+   MISC
+   ══════════════════════════════════════════════ */
+
 .page-enter {
   animation: fade-in 200ms ease-out;
 }
@@ -163,19 +241,20 @@ input[type="date"].input::-webkit-calendar-picker-indicator {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Focus visible outline for accessibility */
 button:focus-visible,
 a:focus-visible {
   @apply outline-none ring-2 ring-primary/50 rounded-md;
 }
 
-/* Selection */
 ::selection {
   background-color: rgb(220 38 38 / 0.4);
-  color: #FAFAFA;
+  color: rgb(var(--text));
 }
 
-/* Print styles — hide chrome, force light mode, keep content flowing */
+/* ══════════════════════════════════════════════
+   PRINT
+   ══════════════════════════════════════════════ */
+
 @media print {
   html,
   body {
@@ -188,12 +267,10 @@ a:focus-visible {
     padding: 0 !important;
   }
 
-  /* Hide chrome + interactives via a single, reliable class */
   .no-print {
     display: none !important;
   }
 
-  /* Flatten the app shell */
   #root,
   #root > div,
   .print-body {
@@ -215,7 +292,6 @@ a:focus-visible {
     max-height: none !important;
   }
 
-  /* Cards — light, bordered */
   .card {
     background: #ffffff !important;
     border: 1px solid #cccccc !important;
@@ -227,13 +303,11 @@ a:focus-visible {
     margin-bottom: 12px;
   }
 
-  /* Force all text black */
   * {
     color: #000000 !important;
     text-shadow: none !important;
   }
 
-  /* Preserve semantic colors as print-safe variants */
   .text-muted { color: #666666 !important; }
   .text-success { color: #15803d !important; }
   .text-danger { color: #b91c1c !important; }
@@ -241,7 +315,6 @@ a:focus-visible {
   .text-primary { color: #1e3a8a !important; }
   .text-info { color: #1d4ed8 !important; }
 
-  /* Print header block */
   .print-header {
     display: block !important;
     border-bottom: 2px solid #333333 !important;
@@ -249,22 +322,17 @@ a:focus-visible {
     margin-bottom: 16px !important;
   }
 
-  /* Tables */
   table {
     border-collapse: collapse !important;
     width: 100% !important;
   }
-  th,
-  td {
+  th, td {
     border: 1px solid #cccccc !important;
     padding: 6px 8px !important;
     font-size: 11px !important;
   }
-  thead {
-    background: #f0f0f0 !important;
-  }
+  thead { background: #f0f0f0 !important; }
 
-  /* Badges */
   .badge {
     border: 1px solid #999999 !important;
     color: #000000 !important;
@@ -273,16 +341,11 @@ a:focus-visible {
     border-radius: 999px !important;
   }
 
-  /* Headings */
   h1 { font-size: 20px !important; margin: 0 0 4px 0 !important; }
   h2 { font-size: 15px !important; margin: 8px 0 6px 0 !important; }
   h3 { font-size: 13px !important; }
 
-  /* Page break hints */
   .page-enter { animation: none !important; }
 }
 
-/* Hidden by default; only visible in print */
-.print-header {
-  display: none;
-}
+.print-header { display: none; }

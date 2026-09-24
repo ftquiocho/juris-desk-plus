@@ -3,6 +3,7 @@ import { Menu } from "lucide-react";
 import UserMenu from "./UserMenu";
 import SearchBar from "./SearchBar";
 import NotificationBell from "./NotificationBell";
+import ThemeToggle from "./ThemeToggle";
 
 export default function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -13,6 +14,7 @@ export default function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
       <div className="hidden md:flex h-full items-center justify-between px-6 gap-4">
         <SearchBar />
         <div className="flex items-center gap-3 shrink-0">
+          <ThemeToggle />
           <NotificationBell />
           <UserMenu />
         </div>
@@ -49,6 +51,7 @@ export default function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
                 <path d="m21 21-4.3-4.3" />
               </svg>
             </button>
+            <ThemeToggle />
             <NotificationBell />
             <UserMenu />
           </>

@@ -45,6 +45,14 @@ interface StoreState {
   users: User[];
   notifications: AppNotification[];
   contacts: Contact[];
+  timer: {
+    active: boolean;
+    matterId: string | null;
+    activity: string;
+    startedAt: number | null;
+    pausedMs: number;
+    pausedAt: number | null;
+  };
 
   setCurrentUser: (user: User | null) => void;
   addClient: (client: Client) => void;
@@ -86,6 +94,11 @@ interface StoreState {
   addContact: (contact: Contact) => void;
   updateContact: (contact: Contact) => void;
   removeContact: (id: string) => void;
+  startTimer: (matterId: string, activity: string) => void;
+  pauseTimer: () => void;
+  resumeTimer: () => void;
+  stopTimer: () => void;
+  discardTimer: () => void;
   uploadNewVersion: (
     docId: string,
     userId: string,
@@ -93,7 +106,7 @@ interface StoreState {
   ) => void;
 }
 
-export const useStore = create<StoreState>((set) => ({
+export const useStore = create<StoreState>((set, get) => ({
   currentUser: null,
   clients,
   matters,
@@ -111,6 +124,14 @@ export const useStore = create<StoreState>((set) => ({
   users: seedUsers,
   notifications: [],
   contacts: seedContacts,
+  timer: {
+    active: false,
+    matterId: null,
+    activity: "",
+    startedAt: null,
+    pausedMs: 0,
+    pausedAt: null,
+  },
 
   setCurrentUser: (user) => set({ currentUser: user }),
   addClient: (client) => set((s) => ({ clients: [...s.clients, client] })),
@@ -227,6 +248,108 @@ export const useStore = create<StoreState>((set) => ({
     })),
   removeContact: (id) =>
     set((s) => ({ contacts: s.contacts.filter((c) => c.id !== id) })),
+  startTimer: (matterId, activity) =>
+    set({
+      timer: {
+        active: true,
+        matterId,
+        activity,
+        startedAt: Date.now(),
+        pausedMs: 0,
+        pausedAt: null,
+      },
+    }),
+  pauseTimer: () =>
+    set((s) =>
+      s.timer.active && !s.timer.pausedAt
+        ? { timer: { ...s.timer, pausedAt: Date.now() } }
+        : {}
+    ),
+  resumeTimer: () =>
+    set((s) =>
+      s.timer.pausedAt
+        ? {
+            timer: {
+              ...s.timer,
+              pausedMs:
+                s.timer.pausedMs + (Date.now() - s.timer.pausedAt!),
+              pausedAt: null,
+            },
+          }
+        : {}
+    ),
+  stopTimer: () => {
+    const s = get();
+    const t = s.timer;
+    if (!t.active || !t.startedAt || !t.matterId || !s.currentUser) {
+      return;
+    }
+
+    const extraPause = t.pausedAt ? Date.now() - t.pausedAt : 0;
+    const elapsedMs = Date.now() - t.startedAt - t.pausedMs - extraPause;
+    const hours = Math.round((elapsedMs / 3600000) * 100) / 100;
+
+    if (hours < 0.01) {
+      set({
+        timer: {
+          active: false,
+          matterId: null,
+          activity: "",
+          startedAt: null,
+          pausedMs: 0,
+          pausedAt: null,
+        },
+      });
+      return;
+    }
+
+    const rate = s.currentUser.defaultRate ?? 0;
+
+    set((state) => ({
+      timeEntries: [
+        ...state.timeEntries,
+        {
+          id: `TE-${Date.now()}`,
+          matterId: t.matterId!,
+          userId: state.currentUser!.id,
+          activity: t.activity || "Tracked via timer",
+          duration: hours,
+          billable: true,
+          rate,
+          date: new Date().toISOString().slice(0, 10),
+        },
+      ],
+      auditLog: [
+        {
+          id: `LOG-${Date.now()}`,
+          userId: state.currentUser!.id,
+          action: "Logged time via timer",
+          target: t.matterId!,
+          timestamp: new Date().toISOString(),
+        },
+        ...state.auditLog,
+      ],
+      timer: {
+        active: false,
+        matterId: null,
+        activity: "",
+        startedAt: null,
+        pausedMs: 0,
+        pausedAt: null,
+      },
+    }));
+  },
+  discardTimer: () =>
+    set({
+      timer: {
+        active: false,
+        matterId: null,
+        activity: "",
+        startedAt: null,
+        pausedMs: 0,
+        pausedAt: null,
+      },
+    }),
   uploadNewVersion: (docId, userId, notes) =>
     set((s) => ({
       documents: s.documents.map((d) => {

@@ -7,6 +7,24 @@
 **Devices:** Mobile-first (phones → tablets → desktop)  
 **Status:** Feature complete — A through W done
 
+---
+
+## Live Deployment
+
+**Production URL:** https://YOUR-URL.vercel.app
+**Vercel Dashboard:** https://vercel.com/YOUR_USERNAME/juris-desk-plus
+**GitHub Repo:** https://github.com/YOUR_USERNAME/juris-desk-plus
+
+**Deploy workflow:**
+1. Make changes locally
+2. `git add . && git commit -m "message" && git push`
+3. Vercel auto-deploys in ~30 seconds
+4. Verify at the production URL
+
+**SPA routing:** handled by `vercel.json` if present.
+
+---
+
 
 ---
 
@@ -413,6 +431,7 @@ Then paste this file.
 | 2026-09-24 | Feature W — Admin user CRUD: add, edit, deactivate, reactivate |
 | 2026-09-24 | UI — `.icon-btn` classes for consistent icon-button affordance |
 | 2026-09-24 | Fix Z — Print now opens a clean HTML page in a new tab (Chrome print preview fix) |
+| 2026-09-24 | Deployed to Vercel via GitHub — live production URL |
 
 
 ---
