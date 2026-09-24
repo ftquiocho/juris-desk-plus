@@ -75,7 +75,7 @@ export default function UserMenu() {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-72 bg-elevated border border-border rounded-xl shadow-2xl overflow-hidden z-50">
+        <div className="absolute right-0 top-full mt-2 w-72 bg-elevated border border-border rounded-xl shadow-modal overflow-hidden z-50">
           {/* Signed in as */}
           <div className="p-3 border-b border-border">
             <p className="text-[10px] uppercase tracking-wider text-muted mb-2 px-2">

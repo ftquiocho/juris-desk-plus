@@ -15,27 +15,27 @@ const map: Record<string, { cls: string; Icon: LucideIcon }> = {
     Icon: FileText,
   },
   Pending: {
-    cls: "bg-warning-light text-warning border-warning/20",
+    cls: "bg-warning-light text-warning-ink border-warning/20",
     Icon: Clock,
   },
   "Pending Review": {
-    cls: "bg-warning-light text-warning border-warning/20",
+    cls: "bg-warning-light text-warning-ink border-warning/20",
     Icon: Clock,
   },
   Approved: {
-    cls: "bg-success-light text-success border-success/20",
+    cls: "bg-success-light text-success-ink border-success/20",
     Icon: CheckCircle,
   },
   Rejected: {
-    cls: "bg-danger-light text-danger border-danger/20",
+    cls: "bg-danger-light text-danger-ink border-danger/20",
     Icon: XCircle,
   },
   Open: {
-    cls: "bg-primary-light text-primary border-primary/30",
+    cls: "bg-primary-light text-primary-ink border-primary/30",
     Icon: Clock,
   },
   "On Hold": {
-    cls: "bg-warning-light text-warning border-warning/20",
+    cls: "bg-warning-light text-warning-ink border-warning/20",
     Icon: Pause,
   },
   Closed: {
@@ -43,19 +43,19 @@ const map: Record<string, { cls: string; Icon: LucideIcon }> = {
     Icon: CheckCircle,
   },
   Sent: {
-    cls: "bg-info-light text-info border-info/20",
+    cls: "bg-info-light text-info-ink border-info/20",
     Icon: Send,
   },
   Paid: {
-    cls: "bg-success-light text-success border-success/20",
+    cls: "bg-success-light text-success-ink border-success/20",
     Icon: CheckCircle,
   },
   Overdue: {
-    cls: "bg-danger-light text-danger border-danger/20",
+    cls: "bg-danger-light text-danger-ink border-danger/20",
     Icon: AlertTriangle,
   },
   Unpaid: {
-    cls: "bg-warning-light text-warning border-warning/20",
+    cls: "bg-warning-light text-warning-ink border-warning/20",
     Icon: AlertTriangle,
   },
 };

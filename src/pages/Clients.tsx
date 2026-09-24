@@ -370,7 +370,7 @@ export default function Clients() {
           onClick={() => setExpandedId(null)}
         >
           <div
-            className="bg-elevated w-full md:max-w-2xl rounded-t-2xl md:rounded-2xl border border-border shadow-2xl max-h-[90vh] overflow-hidden flex flex-col"
+            className="bg-elevated w-full md:max-w-2xl rounded-t-2xl md:rounded-2xl border border-border shadow-modal max-h-[90vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {(() => {

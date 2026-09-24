@@ -16,21 +16,27 @@ export default {
         "primary-hover": "rgb(var(--primary-hover) / <alpha-value>)",
         "primary-dark": "rgb(var(--primary-dark) / <alpha-value>)",
         "primary-light": "rgb(var(--primary-light) / <alpha-value>)",
+        "primary-ink": "rgb(var(--primary-ink) / <alpha-value>)",
         success: "rgb(var(--success) / <alpha-value>)",
         "success-light": "rgb(var(--success-light) / <alpha-value>)",
+        "success-ink": "rgb(var(--success-ink) / <alpha-value>)",
         warning: "rgb(var(--warning) / <alpha-value>)",
         "warning-light": "rgb(var(--warning-light) / <alpha-value>)",
+         "warning-ink": "rgb(var(--warning-ink) / <alpha-value>)",
         danger: "rgb(var(--danger) / <alpha-value>)",
         "danger-light": "rgb(var(--danger-light) / <alpha-value>)",
+        "danger-ink": "rgb(var(--danger-ink) / <alpha-value>)",
         info: "rgb(var(--info) / <alpha-value>)",
         "info-light": "rgb(var(--info-light) / <alpha-value>)",
+        "info-ink": "rgb(var(--info-ink) / <alpha-value>)",
+
       },
       boxShadow: {
-        sm: "0 1px 2px 0 rgb(0 0 0 / 0.1)",
-        card: "0 1px 3px 0 rgb(0 0 0 / 0.15), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
-        "card-hover":
-          "0 4px 16px 0 rgb(220 38 38 / 0.15), 0 2px 4px 0 rgb(0 0 0 / 0.1)",
-        glow: "0 0 24px 0 rgb(220 38 38 / 0.35)",
+        sm: "var(--shadow-sm)",
+        card: "var(--shadow-card)",
+        "card-hover": "var(--shadow-card-hover)",
+        glow: "var(--shadow-glow)",
+        modal: "var(--shadow-modal)",
       },
       keyframes: {
         "fade-in": {

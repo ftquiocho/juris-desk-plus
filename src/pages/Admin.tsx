@@ -255,9 +255,9 @@ function RatesTab() {
     <div className="space-y-4">
       <div className="card bg-info-light/20 border-info/30">
         <div className="flex items-start gap-3">
-          <AlertCircle size={18} className="text-info shrink-0 mt-0.5" />
+          <AlertCircle size={18} className="text-info-ink shrink-0 mt-0.5" />
           <div>
-            <p className="font-medium text-sm">Default Billing Rates</p>
+            <p className="font-medium text-sm text-info-ink">Default Billing Rates</p>
             <p className="text-xs text-muted mt-1">
               These rates auto-fill in the Time Tracker when a user logs time.
               Users can still override per entry. Changes are audit-logged.

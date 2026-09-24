@@ -99,7 +99,7 @@ export default function TimerWidget() {
 
       {/* Start form */}
       {!running && open && (
-        <div className="w-80 bg-elevated border border-border rounded-xl shadow-2xl overflow-hidden">
+        <div className="w-80 bg-elevated border border-border rounded-xl shadow-modal overflow-hidden">
           <div className="flex items-center justify-between p-3 border-b border-border">
             <div className="flex items-center gap-2">
               <TimerIcon size={16} className="text-primary" />
@@ -157,7 +157,7 @@ export default function TimerWidget() {
       {/* Running pill */}
       {running && (
         <div
-          className={`w-72 md:w-80 bg-elevated border rounded-xl shadow-2xl overflow-hidden transition-colors ${
+          className={`w-72 md:w-80 bg-elevated border rounded-xl shadow-modal overflow-hidden transition-colors ${
             paused ? "border-warning/40" : "border-primary/40"
           }`}
         >

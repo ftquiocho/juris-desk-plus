@@ -476,7 +476,7 @@ function UploadVersionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4">
-      <div className="bg-elevated w-full md:max-w-md rounded-t-2xl md:rounded-2xl border border-border shadow-2xl">
+      <div className="bg-elevated w-full md:max-w-md rounded-t-2xl md:rounded-2xl border border-border shadow-modal">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <UploadIcon size={18} className="text-primary" />
@@ -563,7 +563,7 @@ function VersionHistoryModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4">
-      <div className="bg-elevated w-full md:max-w-md rounded-t-2xl md:rounded-2xl border border-border shadow-2xl max-h-[80vh] flex flex-col">
+      <div className="bg-elevated w-full md:max-w-md rounded-t-2xl md:rounded-2xl border border-border shadow-modal max-h-[80vh] flex flex-col">
         <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
           <div className="flex items-center gap-2">
             <History size={18} className="text-primary" />
@@ -666,7 +666,7 @@ function CloseMatterModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4">
-      <div className="bg-elevated w-full md:max-w-md rounded-t-2xl md:rounded-2xl border border-border shadow-2xl">
+      <div className="bg-elevated w-full md:max-w-md rounded-t-2xl md:rounded-2xl border border-border shadow-modal">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <CheckCircle2 size={18} className="text-primary" />
@@ -689,7 +689,7 @@ function CloseMatterModal({
 
           {(trustBalance > 0 || unpaid > 0) && (
             <div className="card bg-warning-light/20 border-warning/30 !p-3">
-              <p className="text-sm font-medium text-warning mb-1">
+              <p className="text-sm font-medium text-warning-ink mb-1">
                 Heads up — outstanding items
               </p>
               <ul className="text-xs text-muted space-y-1">

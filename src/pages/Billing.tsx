@@ -440,12 +440,12 @@ export default function Billing() {
           >
             <div className="flex items-center gap-3">
               {matched ? (
-                <CheckCircle className="text-success" size={22} />
+                <CheckCircle className="text-success-ink" size={22} />
               ) : (
-                <AlertTriangle className="text-danger" size={22} />
+                <AlertTriangle className="text-danger-ink" size={22} />
               )}
               <div>
-                <p className="font-semibold">
+                <p className={`font-semibold ${matched ? "text-success-ink" : "text-danger-ink"}`}>
                   {matched
                     ? "All three balances match"
                     : "Mismatch detected — investigate"}

@@ -32,15 +32,16 @@ export default function ToastContainer() {
       {toasts.map((t) => (
         <div
           key={t.id}
-          className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-white animate-slide-in-right border ${t.type === "success"
-              ? "bg-success-light border-success/40 text-success"
-              : t.type === "error"
-                ? "bg-danger-light border-danger/40 text-danger"
-                : "bg-primary-light border-primary/40 text-primary"
-            }`}
-          style={{
-            boxShadow: "0 8px 24px 0 rgb(0 0 0 / 0.5)",
-          }}
+      className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm animate-slide-in-right border ${
+        t.type === "success"
+          ? "bg-success-light border-success/40 text-success-ink"
+          : t.type === "error"
+          ? "bg-danger-light border-danger/40 text-danger-ink"
+          : "bg-primary-light border-primary/40 text-primary-ink"
+      }`}
+      style={{
+        boxShadow: "var(--shadow-modal)",
+      }}
         >
           {t.type === "success" ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
           <span className="flex-1">{t.message}</span>

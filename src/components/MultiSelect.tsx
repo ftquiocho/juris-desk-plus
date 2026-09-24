@@ -81,7 +81,7 @@ export default function MultiSelect({
       </div>
 
       {open && (
-        <div className="absolute z-20 mt-1 w-full bg-elevated border border-edge rounded-lg shadow-lg max-h-64 overflow-auto">
+        <div className="absolute z-20 mt-1 w-full bg-elevated border border-edge rounded-lg shadow-modal max-h-64 overflow-auto">
           <div className="p-2 border-b border-border sticky top-0 bg-elevated">
             <input
               autoFocus

@@ -196,7 +196,7 @@ export default function SearchBar({ onNavigate }: { onNavigate?: () => void }) {
 
       {/* Results dropdown */}
       {open && q.length >= 2 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-elevated border border-border rounded-xl shadow-2xl overflow-hidden z-50 max-h-96 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-elevated border border-border rounded-xl shadow-modal overflow-hidden z-50 max-h-96 overflow-y-auto">
           {results.length === 0 ? (
             <div className="p-6 text-center">
               <Search size={24} className="text-muted mx-auto mb-2" />

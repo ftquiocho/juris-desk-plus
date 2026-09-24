@@ -16,41 +16,79 @@
   --edge: 51 51 51;
   --text: 250 250 250;
   --muted: 139 139 139;
+
   --primary: 220 38 38;
   --primary-hover: 185 28 28;
   --primary-dark: 127 29 29;
   --primary-light: 42 15 15;
+  --primary-ink: 248 113 113;
+
   --success: 34 197 94;
   --success-light: 15 42 24;
+  --success-ink: 74 222 128;
+
   --warning: 245 158 11;
   --warning-light: 42 31 10;
+  --warning-ink: 252 211 77;
+
   --danger: 239 68 68;
   --danger-light: 42 12 12;
+  --danger-ink: 248 113 113;
+
   --info: 59 130 246;
   --info-light: 15 26 42;
+  --info-ink: 96 165 250;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.6), 0 1px 2px -1px rgb(0 0 0 / 0.5);
+  --shadow-card-hover: 0 4px 16px 0 rgb(220 38 38 / 0.12), 0 2px 4px 0 rgb(0 0 0 / 0.5);
+  --shadow-glow: 0 0 24px 0 rgb(220 38 38 / 0.35);
+  --shadow-btn: 0 4px 12px 0 rgb(220 38 38 / 0.25);
+  --shadow-btn-hover: 0 6px 20px 0 rgb(220 38 38 / 0.4);
+  --shadow-modal: 0 25px 50px -12px rgb(0 0 0 / 0.6);
 }
 
 :root[data-theme="light"] {
   --bg: 248 250 252;
   --surface: 255 255 255;
-  --surface-hover: 241 245 249;
+  --surface-hover: 248 250 252;
   --elevated: 255 255 255;
   --border: 226 232 240;
   --edge: 203 213 225;
   --text: 15 23 42;
   --muted: 100 116 139;
+
   --primary: 220 38 38;
   --primary-hover: 185 28 28;
   --primary-dark: 127 29 29;
   --primary-light: 254 226 226;
+  --primary-ink: 153 27 27;      /* #991B1B — 7.9:1 on --primary-light */
+
   --success: 22 163 74;
   --success-light: 220 252 231;
+  --success-ink: 22 101 52;      /* #166534 — 7.1:1 on --success-light */
+
   --warning: 202 138 4;
   --warning-light: 254 249 195;
+  --warning-ink: 133 77 14;      /* #854D0E — 8.2:1 on --warning-light */
+
   --danger: 185 28 28;
   --danger-light: 254 226 226;
+  --danger-ink: 153 27 27;       /* #991B1B — 7.9:1 on --danger-light */
+
   --info: 37 99 235;
   --info-light: 239 246 255;
+  --info-ink: 30 64 175;         /* #1E40AF — 7.5:1 on --info-light */
+
+  /* Shadows — subtle for light backgrounds */
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+  --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.03);
+  --shadow-card-hover: 0 2px 8px 0 rgb(15 23 42 / 0.06), 0 1px 3px 0 rgb(15 23 42 / 0.04);
+  --shadow-glow: 0 0 12px 0 rgb(220 38 38 / 0.10);
+  --shadow-btn: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+  --shadow-btn-hover: 0 2px 4px 0 rgb(15 23 42 / 0.06);
+  --shadow-modal: 0 10px 25px -5px rgb(15 23 42 / 0.10), 0 8px 10px -6px rgb(15 23 42 / 0.05);
 }
 
 * {
@@ -88,7 +126,7 @@ body {
 
 .card {
   @apply bg-surface rounded-xl border border-border p-4 md:p-5;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  box-shadow: var(--shadow-card);
 }
 
 .card-hover {
@@ -97,7 +135,7 @@ body {
 
 .card-hover:hover {
   @apply border-edge;
-  box-shadow: 0 4px 16px 0 rgb(220 38 38 / 0.12), 0 2px 4px 0 rgb(0 0 0 / 0.08);
+  box-shadow: var(--shadow-card-hover);
 }
 
 .btn-primary {
@@ -106,11 +144,11 @@ body {
          active:scale-[0.98]
          disabled:opacity-40 disabled:cursor-not-allowed
          focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-bg;
-  box-shadow: 0 4px 12px 0 rgb(220 38 38 / 0.25);
+  box-shadow: var(--shadow-btn);
 }
 
 .btn-primary:hover {
-  box-shadow: 0 6px 20px 0 rgb(220 38 38 / 0.4);
+  box-shadow: var(--shadow-btn-hover);
 }
 
 .btn-secondary {
