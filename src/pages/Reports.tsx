@@ -6,6 +6,7 @@ import {
 import { TrendingUp, Clock, Briefcase, Percent, type LucideIcon } from "lucide-react";
 import { useDelayedLoading } from "../hooks/useDelayedLoading";
 import { SkeletonKpiGrid } from "../components/Skeleton";
+import AgingReport from "../components/AgingReport";
 
 const COLORS = ["#DC2626", "#F59E0B", "#22C55E", "#3B82F6", "#A855F7", "#EC4899"];
 
@@ -206,6 +207,9 @@ export default function Reports() {
           </div>
         </div>
       </div>
+
+      {/* Aging Receivables */}
+      <AgingReport />
     </div>
   );
 }

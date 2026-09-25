@@ -28,17 +28,17 @@ export default function ToastContainer() {
   const remove = useToast((s) => s.remove);
 
   return (
-    <div className="no-print fixed bottom-4 left-4 md:bottom-6 md:left-6 space-y-2 z-50 max-w-[calc(100vw-2rem)] md:max-w-sm">
+    <div className="no-print fixed top-16 md:top-20 left-1/2 -translate-x-1/2 space-y-2 z-50 w-[calc(100vw-2rem)] max-w-sm pointer-events-none">
       {toasts.map((t) => (
         <div
           key={t.id}
-      className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm animate-slide-in-right border ${
-        t.type === "success"
-          ? "bg-success-light border-success/40 text-success-ink"
-          : t.type === "error"
-          ? "bg-danger-light border-danger/40 text-danger-ink"
-          : "bg-primary-light border-primary/40 text-primary-ink"
-      }`}
+          className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg text-sm animate-fade-in border ${
+            t.type === "success"
+              ? "bg-success-light border-success/40 text-success-ink"
+              : t.type === "error"
+              ? "bg-danger-light border-danger/40 text-danger-ink"
+              : "bg-info-light border-info/40 text-info-ink"
+          }`}
       style={{
         boxShadow: "var(--shadow-modal)",
       }}

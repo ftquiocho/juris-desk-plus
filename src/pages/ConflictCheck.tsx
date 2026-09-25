@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { useStore } from "../store/useStore";
 import { clients } from "../data";
+import { useStore } from "../store/useStore";
 import { ShieldCheck, ShieldAlert } from "lucide-react";
-import { useToast } from "../components/Toast";
 
 export default function ConflictCheck() {
   const [name, setName] = useState("");
@@ -10,25 +9,59 @@ export default function ConflictCheck() {
   const [result, setResult] = useState<null | { status: "clear" | "potential"; matches: string[] }>(null);
   const addAuditEvent = useStore((s) => s.addAuditEvent);
   const user = useStore((s) => s.currentUser)!;
-  const push = useToast((s) => s.push);
+  const contacts = useStore((s) => s.contacts);
+  const matters = useStore((s) => s.matters);
 
   const run = (e: React.FormEvent) => {
     e.preventDefault();
-    const query = name.toLowerCase().trim();
-    const matches = clients
-      .filter((c) => c.name.toLowerCase().includes(query) || query.includes(c.name.toLowerCase()))
-      .map((c) => c.name);
+    const client = name.toLowerCase().trim();
+    const opp = opposing.toLowerCase().trim();
+
+    const matches: string[] = [];
+
+    // 1. Match against existing clients
+    clients.forEach((c) => {
+      const n = c.name.toLowerCase();
+      if (
+        (client && (n.includes(client) || client.includes(n))) ||
+        (opp && (n.includes(opp) || opp.includes(n)))
+      ) {
+        matches.push(`${c.name} — existing client (${c.id})`);
+      }
+    });
+
+    // 2. Match against contacts (opposing party, counsel, etc.)
+    contacts.forEach((ct) => {
+      const n = ct.name.toLowerCase();
+      const org = (ct.organization ?? "").toLowerCase();
+      if (
+        (client && (n.includes(client) || client.includes(n))) ||
+        (opp && (n.includes(opp) || opp.includes(n))) ||
+        (opp && org && (org.includes(opp) || opp.includes(org)))
+      ) {
+        matches.push(
+          `${ct.name}${ct.organization ? ` (${ct.organization})` : ""} — ${ct.type}`
+        );
+      }
+    });
+
+    // 3. Match against matters by title
+    matters.forEach((m) => {
+      const t = m.title.toLowerCase();
+      if (
+        (client && t.includes(client)) ||
+        (opp && t.includes(opp))
+      ) {
+        matches.push(`${m.title} — existing matter (${m.id})`);
+      }
+    });
 
     const status = matches.length > 0 ? "potential" : "clear";
     setResult({ status, matches });
-    push(
-      status === "clear" ? "No conflicts found." : "Potential conflict detected.",
-      status === "clear" ? "success" : "info"
-    );
     addAuditEvent({
       id: `LOG-${Date.now()}`,
       userId: user.id,
-      action: `Ran conflict check (${status})`,
+      action: `Ran conflict check (${status}) — ${matches.length} match${matches.length === 1 ? "" : "es"}`,
       target: name || "unnamed",
       timestamp: new Date().toISOString(),
     });
@@ -55,20 +88,29 @@ export default function ConflictCheck() {
 
       {result && (
         <div className={`card mt-4 border-l-4 ${result.status === "clear" ? "border-l-success" : "border-l-warning"}`}>
-          <div className="flex items-center gap-3">
+          <div className="flex items-start gap-3">
             {result.status === "clear" ? (
-              <ShieldCheck className="text-success" size={22} />
+              <ShieldCheck className="text-success-ink" size={22} />
             ) : (
-              <ShieldAlert className="text-warning" size={22} />
+              <ShieldAlert className="text-warning-ink" size={22} />
             )}
-            <div>
-              <p className="font-semibold">
-                {result.status === "clear" ? "No conflicts found" : "Potential conflict detected"}
+            <div className="min-w-0">
+              <p className={`font-semibold ${result.status === "clear" ? "text-success-ink" : "text-warning-ink"}`}>
+                {result.status === "clear"
+                  ? "No conflicts found"
+                  : `Potential conflict — ${result.matches.length} match${result.matches.length === 1 ? "" : "es"}`}
               </p>
-              {result.matches.length > 0 && (
-                <p className="text-sm text-muted mt-1">
-                  Matches: {result.matches.join(", ")} — written informed consent required.
-                </p>
+              {result.status !== "clear" && (
+                <>
+                  <ul className="text-sm text-muted mt-2 space-y-1">
+                    {result.matches.map((m, i) => (
+                      <li key={i}>• {m}</li>
+                    ))}
+                  </ul>
+                  <p className="text-xs text-muted mt-2 italic">
+                    Written informed consent from all parties required before proceeding (CPRA Rule 15.03).
+                  </p>
+                </>
               )}
             </div>
           </div>

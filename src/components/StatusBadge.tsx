@@ -31,7 +31,7 @@ const map: Record<string, { cls: string; Icon: LucideIcon }> = {
     Icon: XCircle,
   },
   Open: {
-    cls: "bg-primary-light text-primary-ink border-primary/30",
+    cls: "bg-info-light text-info-ink border-info/30",
     Icon: Clock,
   },
   "On Hold": {

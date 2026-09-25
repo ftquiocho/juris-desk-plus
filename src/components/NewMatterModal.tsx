@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { X, Briefcase } from "lucide-react";
 import { useStore } from "../store/useStore";
 import { users } from "../data";
 import { useToast } from "./Toast";
+import { checkConflicts } from "../lib/conflictCheck";
+import { ShieldAlert, ShieldCheck, X, Briefcase } from "lucide-react";
 import type { Matter } from "../types";
 
 const matterTypes = [
@@ -63,6 +64,7 @@ export default function NewMatterModal({
   const user = useStore((s) => s.currentUser)!;
   const push = useToast((s) => s.push);
 
+
   const attorneys = users.filter(
     (u) => u.roles.includes("ATTORNEY") || u.roles.includes("MNG_PARTNER")
   );
@@ -89,8 +91,23 @@ export default function NewMatterModal({
   const [nextHearing, setNextHearing] = useState(editing?.nextHearing ?? "");
   const [billingType, setBillingType] = useState<Matter["billingType"]>(editing?.billingType ?? "Hourly");
   const [contingencyPct, setContingencyPct] = useState("25");
+  const runConflictCheck = () => {
+    const matches = checkConflicts({
+      clientName: selectedClient?.name ?? "",
+      matterTitle: title,
+      clients,
+      matters,
+    });
+    setConflictMatches(matches);
+    setConflictChecked(true);
+  };
 
   const selectedClient = clients.find((c) => c.id === clientId);
+  const [conflictMatches, setConflictMatches] = useState<string[]>([]);
+  const [conflictChecked, setConflictChecked] = useState(false);
+  const [consentNote, setConsentNote] = useState("");
+
+
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,6 +120,14 @@ export default function NewMatterModal({
         push("Contingency fee must be between 1% and 25%.", "error");
         return;
       }
+    }
+
+    if (!editing && conflictMatches.length > 0 && !consentNote.trim()) {
+      push(
+        "Conflict detected — enter a consent note to proceed, or cancel.",
+        "error"
+      );
+      return;
     }
 
     if (editing) {
@@ -156,11 +181,11 @@ export default function NewMatterModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4">
       <div className="bg-elevated w-full md:max-w-3xl rounded-t-2xl md:rounded-2xl border border-border shadow-modal max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
           <div className="flex items-center gap-2">
-            <Briefcase size={18} className="text-primary" />
+            <Briefcase size={18} className="text-brand" />
             <h2 className="font-semibold">{editing ? "Edit Matter" : "New Matter"}</h2>
           </div>
           <button
@@ -367,6 +392,69 @@ export default function NewMatterModal({
               </p>
             </div>
           )}
+
+          {/* Conflict check */}
+          <div className="border-t border-border pt-4">
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <div>
+                <p className="font-medium text-sm">Conflict Check</p>
+                <p className="text-xs text-muted">
+                  CPRA Rule 15.03 — scan client + matter title against existing
+                  clients, contacts, and matters.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={runConflictCheck}
+                disabled={!clientId || !title.trim()}
+                className="btn-secondary text-xs py-1.5 px-3 disabled:opacity-40"
+              >
+                {conflictChecked ? "Re-run" : "Run Check"}
+              </button>
+            </div>
+
+            {conflictChecked && conflictMatches.length === 0 && (
+              <div className="flex items-center gap-2 text-xs text-success-ink bg-success-light border border-success/20 rounded-lg px-3 py-2">
+                <ShieldCheck size={14} />
+                No conflicts found. Safe to proceed.
+              </div>
+            )}
+
+            {conflictChecked && conflictMatches.length > 0 && (
+              <div className="bg-warning-light border border-warning/30 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <ShieldAlert size={14} className="text-warning-ink mt-0.5 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-warning-ink">
+                      {conflictMatches.length} potential conflict{conflictMatches.length === 1 ? "" : "s"}
+                    </p>
+                    <ul className="text-xs text-muted mt-1 space-y-0.5">
+                      {conflictMatches.map((m, i) => (
+                        <li key={i}>• {m}</li>
+                      ))}
+                    </ul>
+                    {!editing && (
+                      <div className="mt-3">
+                        <label className="label text-xs">
+                          Consent Note *{" "}
+                          <span className="text-muted font-normal">
+                            — document why you're proceeding
+                          </span>
+                        </label>
+                        <textarea
+                          rows={2}
+                          className="input text-xs"
+                          placeholder="e.g., Written informed consent obtained from all parties on 2025-01-15"
+                          value={consentNote}
+                          onChange={(e) => setConsentNote(e.target.value)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </form>
 
         <div className="p-4 border-t border-border flex gap-3 shrink-0">

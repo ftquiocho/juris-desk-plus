@@ -17,11 +17,19 @@
   --text: 250 250 250;
   --muted: 139 139 139;
 
-  --primary: 220 38 38;
-  --primary-hover: 185 28 28;
-  --primary-dark: 127 29 29;
-  --primary-light: 42 15 15;
-  --primary-ink: 248 113 113;
+  /* Primary — light neutral button on dark bg */
+  --primary: 229 231 235;
+  --primary-hover: 209 213 219;
+  --primary-dark: 156 163 175;
+  --primary-light: 30 41 59;
+  --primary-ink: 229 231 235;
+  --primary-fg: 15 23 42;
+
+  /* Brand — crimson signature (logo, sidebar bar, focus rings) */
+  --brand: 220 38 38;
+  --brand-hover: 185 28 28;
+  --brand-dark: 127 29 29;
+  --brand-light: 42 15 15;
 
   --success: 34 197 94;
   --success-light: 15 42 24;
@@ -39,55 +47,61 @@
   --info-light: 15 26 42;
   --info-ink: 96 165 250;
 
-  /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
   --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.6), 0 1px 2px -1px rgb(0 0 0 / 0.5);
-  --shadow-card-hover: 0 4px 16px 0 rgb(220 38 38 / 0.12), 0 2px 4px 0 rgb(0 0 0 / 0.5);
-  --shadow-glow: 0 0 24px 0 rgb(220 38 38 / 0.35);
-  --shadow-btn: 0 4px 12px 0 rgb(220 38 38 / 0.25);
-  --shadow-btn-hover: 0 6px 20px 0 rgb(220 38 38 / 0.4);
+  --shadow-card-hover: 0 4px 16px 0 rgb(0 0 0 / 0.35), 0 2px 4px 0 rgb(0 0 0 / 0.5);
+  --shadow-glow: 0 0 20px 0 rgb(220 38 38 / 0.22);
+  --shadow-btn: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-btn-hover: 0 2px 6px 0 rgb(0 0 0 / 0.5);
   --shadow-modal: 0 25px 50px -12px rgb(0 0 0 / 0.6);
 }
 
 :root[data-theme="light"] {
   --bg: 248 250 252;
   --surface: 255 255 255;
-  --surface-hover: 248 250 252;
+  --surface-hover: 241 245 249;
   --elevated: 255 255 255;
   --border: 226 232 240;
   --edge: 203 213 225;
   --text: 15 23 42;
   --muted: 100 116 139;
 
-  --primary: 220 38 38;
-  --primary-hover: 185 28 28;
-  --primary-dark: 127 29 29;
-  --primary-light: 254 226 226;
-  --primary-ink: 153 27 27;      /* #991B1B — 7.9:1 on --primary-light */
+  /* Primary — near-black ink button on light bg */
+  --primary: 15 23 42;
+  --primary-hover: 30 41 59;
+  --primary-dark: 2 6 23;
+  --primary-light: 241 245 249;
+  --primary-ink: 15 23 42;
+  --primary-fg: 255 255 255;
+
+  /* Brand — deep crimson signature */
+  --brand: 153 27 27;
+  --brand-hover: 127 29 29;
+  --brand-dark: 100 25 25;
+  --brand-light: 254 226 226;
 
   --success: 22 163 74;
   --success-light: 220 252 231;
-  --success-ink: 22 101 52;      /* #166534 — 7.1:1 on --success-light */
+  --success-ink: 22 101 52;
 
   --warning: 202 138 4;
   --warning-light: 254 249 195;
-  --warning-ink: 133 77 14;      /* #854D0E — 8.2:1 on --warning-light */
+  --warning-ink: 133 77 14;
 
   --danger: 185 28 28;
   --danger-light: 254 226 226;
-  --danger-ink: 153 27 27;       /* #991B1B — 7.9:1 on --danger-light */
+  --danger-ink: 153 27 27;
 
   --info: 37 99 235;
   --info-light: 239 246 255;
-  --info-ink: 30 64 175;         /* #1E40AF — 7.5:1 on --info-light */
+  --info-ink: 30 64 175;
 
-  /* Shadows — subtle for light backgrounds */
   --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.04);
   --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.03);
   --shadow-card-hover: 0 2px 8px 0 rgb(15 23 42 / 0.06), 0 1px 3px 0 rgb(15 23 42 / 0.04);
-  --shadow-glow: 0 0 12px 0 rgb(220 38 38 / 0.10);
-  --shadow-btn: 0 1px 2px 0 rgb(15 23 42 / 0.05);
-  --shadow-btn-hover: 0 2px 4px 0 rgb(15 23 42 / 0.06);
+  --shadow-glow: 0 0 10px 0 rgb(153 27 27 / 0.12);
+  --shadow-btn: 0 1px 2px 0 rgb(15 23 42 / 0.08);
+  --shadow-btn-hover: 0 2px 6px 0 rgb(15 23 42 / 0.12);
   --shadow-modal: 0 10px 25px -5px rgb(15 23 42 / 0.10), 0 8px 10px -6px rgb(15 23 42 / 0.05);
 }
 
@@ -139,11 +153,11 @@ body {
 }
 
 .btn-primary {
-  @apply bg-primary text-white px-4 py-2 rounded-lg font-medium transition-all duration-150
+  @apply bg-primary text-primary-fg px-4 py-2 rounded-lg font-medium transition-all duration-150
          hover:bg-primary-hover
          active:scale-[0.98]
          disabled:opacity-40 disabled:cursor-not-allowed
-         focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-bg;
+         focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 focus:ring-offset-bg;
   box-shadow: var(--shadow-btn);
 }
 
@@ -177,7 +191,7 @@ body {
   @apply w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text transition-all duration-150
          placeholder:text-muted
          hover:border-edge
-         focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20
+         focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20
          disabled:bg-surface disabled:text-muted disabled:cursor-not-allowed;
 }
 
@@ -218,7 +232,7 @@ input[type="date"].input::-webkit-calendar-picker-indicator {
 }
 
 .icon-btn-primary {
-  @apply hover:bg-primary-light hover:text-primary;
+  @apply hover:bg-brand-light hover:text-brand;
 }
 
 .icon-btn-sm {
@@ -281,7 +295,7 @@ input[type="date"].input::-webkit-calendar-picker-indicator {
 
 button:focus-visible,
 a:focus-visible {
-  @apply outline-none ring-2 ring-primary/50 rounded-md;
+  @apply outline-none ring-2 ring-brand/60 rounded-md;
 }
 
 ::selection {

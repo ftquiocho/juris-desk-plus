@@ -1,11 +1,29 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Briefcase, User, FileText, X } from "lucide-react";
+import {
+  Search,
+  Briefcase,
+  User,
+  FileText,
+  CheckSquare,
+  Receipt,
+  Users as UsersIcon,
+  X,
+} from "lucide-react";
 import { useStore } from "../store/useStore";
 import StatusBadge from "./StatusBadge";
 
+type ResultKind =
+  | "matter"
+  | "client"
+  | "document"
+  | "task"
+  | "contact"
+  | "invoice"
+  | "user";
+
 interface SearchResult {
-  type: "matter" | "client" | "document";
+  type: ResultKind;
   id: string;
   title: string;
   subtitle: string;
@@ -24,8 +42,12 @@ export default function SearchBar({ onNavigate }: { onNavigate?: () => void }) {
   const matters = useStore((s) => s.matters);
   const clients = useStore((s) => s.clients);
   const documents = useStore((s) => s.documents);
+  const tasks = useStore((s) => s.tasks);
+  const contacts = useStore((s) => s.contacts);
+  const invoices = useStore((s) => s.invoices);
+  const users = useStore((s) => s.users);
 
-  // Cmd+K / Ctrl+K focuses search
+  // ⌘K / Ctrl+K focuses
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -42,7 +64,7 @@ export default function SearchBar({ onNavigate }: { onNavigate?: () => void }) {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  // Click outside closes
+  // Click outside
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
@@ -54,11 +76,9 @@ export default function SearchBar({ onNavigate }: { onNavigate?: () => void }) {
   }, []);
 
   const q = query.trim().toLowerCase();
-
   const results: SearchResult[] = [];
 
   if (q.length >= 2) {
-    // Matters
     matters
       .filter(
         (m) =>
@@ -79,13 +99,13 @@ export default function SearchBar({ onNavigate }: { onNavigate?: () => void }) {
         });
       });
 
-    // Clients
     clients
       .filter(
         (c) =>
           c.name.toLowerCase().includes(q) ||
           c.email.toLowerCase().includes(q) ||
-          c.id.toLowerCase().includes(q)
+          (c.fileNumber ?? "").toLowerCase().includes(q) ||
+          (c.clientNumber ?? "").toLowerCase().includes(q)
       )
       .slice(0, 3)
       .forEach((c) => {
@@ -94,11 +114,10 @@ export default function SearchBar({ onNavigate }: { onNavigate?: () => void }) {
           id: c.id,
           title: c.name,
           subtitle: `${c.id} · ${c.caseType}`,
-          link: `/clients`,
+          link: "/clients",
         });
       });
 
-    // Documents
     documents
       .filter(
         (d) =>
@@ -116,25 +135,97 @@ export default function SearchBar({ onNavigate }: { onNavigate?: () => void }) {
           link: `/matters/${d.matterId}`,
         });
       });
+
+    tasks
+      .filter((t) => t.title.toLowerCase().includes(q))
+      .slice(0, 3)
+      .forEach((t) => {
+        const matter = matters.find((m) => m.id === t.matterId);
+        results.push({
+          type: "task",
+          id: t.id,
+          title: t.title,
+          subtitle: `${matter?.title ?? "—"} · Due ${t.dueDate}`,
+          status: t.status,
+          link: "/tasks",
+        });
+      });
+
+    contacts
+      .filter(
+        (c) =>
+          c.name.toLowerCase().includes(q) ||
+          (c.organization ?? "").toLowerCase().includes(q) ||
+          (c.email ?? "").toLowerCase().includes(q)
+      )
+      .slice(0, 3)
+      .forEach((c) => {
+        results.push({
+          type: "contact",
+          id: c.id,
+          title: c.name,
+          subtitle: `${c.type}${c.organization ? ` · ${c.organization}` : ""}`,
+          link: "/contacts",
+        });
+      });
+
+    invoices
+      .filter((i) => i.id.toLowerCase().includes(q))
+      .slice(0, 3)
+      .forEach((i) => {
+        const client = clients.find((c) => c.id === i.clientId);
+        results.push({
+          type: "invoice",
+          id: i.id,
+          title: i.id,
+          subtitle: `${client?.name ?? "—"} · ₱${i.amount.toLocaleString()}`,
+          status: i.status,
+          link: "/billing",
+        });
+      });
+
+    users
+      .filter(
+        (u) =>
+          u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+      )
+      .slice(0, 2)
+      .forEach((u) => {
+        results.push({
+          type: "user",
+          id: u.id,
+          title: u.name,
+          subtitle: u.title,
+          link: "/admin",
+        });
+      });
   }
 
-  const grouped: Record<SearchResult["type"], SearchResult[]> = {
-    matter: results.filter((r) => r.type === "matter"),
-    client: results.filter((r) => r.type === "client"),
-    document: results.filter((r) => r.type === "document"),
-  };
-
-  const iconFor = (type: SearchResult["type"]) => {
+  const iconFor = (type: ResultKind) => {
     if (type === "matter") return Briefcase;
     if (type === "client") return User;
-    return FileText;
+    if (type === "document") return FileText;
+    if (type === "task") return CheckSquare;
+    if (type === "contact") return UsersIcon;
+    if (type === "invoice") return Receipt;
+    return User;
   };
 
-  const labelFor = (type: SearchResult["type"]) => {
+  const labelFor = (type: ResultKind) => {
     if (type === "matter") return "Matters";
     if (type === "client") return "Clients";
-    return "Documents";
+    if (type === "document") return "Documents";
+    if (type === "task") return "Tasks";
+    if (type === "contact") return "Contacts";
+    if (type === "invoice") return "Invoices";
+    return "Users";
   };
+
+  const grouped = results.reduce<Record<string, SearchResult[]>>((acc, r) => {
+    if (!acc[r.type]) acc[r.type] = [];
+    acc[r.type].push(r);
+    return acc;
+  }, {});
 
   const go = (link: string) => {
     setOpen(false);
@@ -173,7 +264,7 @@ export default function SearchBar({ onNavigate }: { onNavigate?: () => void }) {
           onFocus={() => query.length >= 2 && setOpen(true)}
           onKeyDown={handleKeyDown}
           className="w-full bg-transparent outline-none text-sm text-text placeholder:text-muted"
-          placeholder="Search matters, clients, documents... (⌘K)"
+          placeholder="Search anything... (⌘K)"
         />
         {query && (
           <button
@@ -194,7 +285,6 @@ export default function SearchBar({ onNavigate }: { onNavigate?: () => void }) {
         )}
       </div>
 
-      {/* Results dropdown */}
       {open && q.length >= 2 && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-elevated border border-border rounded-xl shadow-modal overflow-hidden z-50 max-h-96 overflow-y-auto">
           {results.length === 0 ? (
@@ -207,9 +297,19 @@ export default function SearchBar({ onNavigate }: { onNavigate?: () => void }) {
             </div>
           ) : (
             <div className="py-2">
-              {(["matter", "client", "document"] as const).map((type) => {
+              {(
+                [
+                  "matter",
+                  "client",
+                  "document",
+                  "task",
+                  "contact",
+                  "invoice",
+                  "user",
+                ] as ResultKind[]
+              ).map((type) => {
                 const group = grouped[type];
-                if (group.length === 0) return null;
+                if (!group || group.length === 0) return null;
                 const Icon = iconFor(type);
                 return (
                   <div key={type} className="mb-1">
@@ -224,9 +324,7 @@ export default function SearchBar({ onNavigate }: { onNavigate?: () => void }) {
                           onClick={() => go(r.link)}
                           onMouseEnter={() => setFocusIndex(idx)}
                           className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${
-                            focusIndex === idx
-                              ? "bg-surface-hover"
-                              : "hover:bg-surface-hover"
+                            focusIndex === idx ? "bg-surface-hover" : ""
                           }`}
                         >
                           <div className="w-8 h-8 rounded-lg bg-surface-hover flex items-center justify-center shrink-0">
@@ -240,9 +338,7 @@ export default function SearchBar({ onNavigate }: { onNavigate?: () => void }) {
                               {r.subtitle}
                             </p>
                           </div>
-                          {r.status && (
-                            <StatusBadge status={r.status} />
-                          )}
+                          {r.status && <StatusBadge status={r.status} />}
                         </button>
                       );
                     })}

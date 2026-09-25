@@ -116,7 +116,7 @@ export default function Tasks() {
             onClick={() => setStatus(s)}
             className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition border ${
               status === s
-                ? "bg-primary text-white border-primary"
+                ? "bg-brand text-white border-brand"
                 : "bg-surface text-muted border-border hover:bg-surface-hover hover:border-edge"
             }`}
           >
@@ -156,7 +156,7 @@ export default function Tasks() {
                       {t.title}
                     </p>
                     <p className="text-xs text-muted">
-                      <Link to={`/matters/${t.matterId}`} className="hover:text-primary transition-colors">
+                      <Link to={`/matters/${t.matterId}`} className="hover:text-brand transition-colors">
                         {matter?.title ?? "Unknown"}
                       </Link>{" "}
                       · {assignee?.name ?? "—"} · Due {t.dueDate}

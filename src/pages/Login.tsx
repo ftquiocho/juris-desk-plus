@@ -17,7 +17,7 @@ export default function Login() {
       <div className="w-full max-w-md relative z-10">
         {/* Brand */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-white mb-4 shadow-glow">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand text-white mb-4">
             <Scale size={28} />
           </div>
           <h1 className="text-2xl font-bold text-text">
@@ -50,7 +50,7 @@ export default function Login() {
                   </p>
                   <p className="text-xs text-muted truncate">{u.title}</p>
                 </div>
-                <span className="text-[10px] text-primary font-semibold shrink-0 ml-2 group-hover:text-primary-hover uppercase tracking-wide">
+                <span className="text-[10px] text-primary font-semibold shrink-0 ml-2 group-hover:text-brand-hover uppercase tracking-wide">
                   {u.roles
                     .map((r) => r.split("_")[0])
                     .join(" · ")}

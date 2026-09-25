@@ -44,7 +44,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
       {/* Logo */}
       <div className="p-5 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-9 h-9 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-glow">
+          <div className="w-9 h-9 rounded-lg bg-brand text-white flex items-center justify-center font-bold text-sm shrink-0">
             {APP_CONFIG.logoInitials}
           </div>
           <div className="min-w-0">
@@ -82,7 +82,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
               className={({ isActive }) =>
                 `relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
                   isActive
-                    ? "bg-primary/10 text-primary"
+                    ? "bg-surface-hover text-text"
                     : "text-muted hover:bg-surface-hover hover:text-text"
                 } ${!allowed ? "opacity-30 pointer-events-none" : ""}`
               }
@@ -91,7 +91,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
               {({ isActive }) => (
                 <>
                   {isActive && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-brand rounded-r-full" />
                   )}
                   <Icon size={18} className="shrink-0" />
                   <span className="truncate">{it.label}</span>

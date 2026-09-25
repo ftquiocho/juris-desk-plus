@@ -5,8 +5,10 @@ import { clients } from "../data";
 import KpiCard from "../components/KpiCard";
 import MatterCard from "../components/MatterCard";
 import StatusBadge from "../components/StatusBadge";
+import NeedsAttention from "../components/NeedsAttention";
 import { useDelayedLoading } from "../hooks/useDelayedLoading";
 import { SkeletonKpiGrid, SkeletonCards } from "../components/Skeleton";
+import ActivityFeed from "../components/ActivityFeed";
 import {
   LayoutGrid,
   List as ListIcon,
@@ -106,6 +108,14 @@ export default function Dashboard() {
             accent="text-warning"
           />
           <KpiCard label="Hours Logged" value={`${hours}h`} />
+        </div>
+      )}
+
+      {/* Needs Attention + Activity Feed (2-column on desktop) */}
+      {!loading && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <NeedsAttention />
+          <ActivityFeed />
         </div>
       )}
 

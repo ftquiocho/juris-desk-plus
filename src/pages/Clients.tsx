@@ -146,7 +146,7 @@ export default function Clients() {
             }}
             className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition border ${
               caseType === t
-                ? "bg-primary text-white border-primary"
+                ? "bg-brand text-white border-brand"
                 : "bg-surface text-muted border-border hover:bg-surface-hover hover:border-edge"
             }`}
           >
@@ -366,7 +366,7 @@ export default function Clients() {
       {/* Expanded detail drawer (shared for table + cards) */}
       {expandedId && (
         <div
-          className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4"
+          className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4"
           onClick={() => setExpandedId(null)}
         >
           <div

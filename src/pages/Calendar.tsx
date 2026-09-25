@@ -16,8 +16,10 @@ import {
   Gavel,
   Briefcase,
   CheckSquare,
+  Calculator,
   type LucideIcon,
 } from "lucide-react";
+import DeadlineCalculator from "../components/DeadlineCalculator";
 
 type ViewMode = "list" | "calendar";
 type EventType = "hearing" | "opened" | "task";
@@ -55,6 +57,7 @@ export default function Calendar() {
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [showDeadlineCalc, setShowDeadlineCalc] = useState(false);
 
   // Build all events
   const events: CalEvent[] = useMemo(() => {
@@ -181,7 +184,16 @@ export default function Calendar() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => setShowDeadlineCalc(true)}
+            className="btn-secondary flex items-center gap-2"
+          >
+            <Calculator size={16} />
+            <span className="hidden sm:inline">Deadline Calculator</span>
+            <span className="sm:hidden">Deadline</span>
+          </button>
+
           {view === "calendar" && (
             <div className="flex items-center gap-1 border border-border rounded-lg px-1">
               <button
@@ -272,6 +284,10 @@ export default function Calendar() {
           events={eventsByDate[selectedDay] ?? []}
           onClose={() => setSelectedDay(null)}
         />
+      )}
+
+      {showDeadlineCalc && (
+        <DeadlineCalculator onClose={() => setShowDeadlineCalc(false)} />
       )}
     </div>
   );
@@ -446,7 +462,7 @@ function DayDrawer({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4"
+      className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4"
       onClick={onClose}
     >
       <div

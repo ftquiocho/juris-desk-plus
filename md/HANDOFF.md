@@ -5,7 +5,7 @@
 **Demo Firm:** Nelson & Murdock Law Offices  
 **Stack:** React 18 + Vite + TypeScript + TailwindCSS + Zustand + React Router + Recharts  
 **Devices:** Mobile-first (phones → tablets → desktop)  
-**Status:** Feature complete — A through W done
+**Status:** Feature complete — A through 9 done. Building Tier 2 (Quick Create, Needs Attention, Extended Search) next.
 
 ---
 
@@ -67,6 +67,8 @@ juris-desk-plus/
     │   └── permissions.ts        # RBAC (can() function)
     │   └── csv.ts                # CSV parser + template download
     │   ├── printWindow.ts         # Reliable print via new-window HTML
+    │   ├── conflictCheck.ts       # Shared conflict-check logic
+    │   ├── trustAlerts.ts         # Trust balance utilities
     ├── hooks/
     │   └── useDelayedLoading.ts  # Simulated loading for demo
     ├── data/                     # Nelson & Murdock seed data
@@ -79,6 +81,7 @@ juris-desk-plus/
     │   ├── invoices.ts           # 5 invoices
     │   └── trust.ts              # 7 trust transactions
     │   ├── tasks.ts              # Seed tasks
+    │   ├── templates.ts           # Document template catalog
     ├── components/
     │   ├── Layout.tsx            # Shell + mobile drawer + page transitions
     │   ├── Sidebar.tsx           # RBAC-aware nav (auto-closes on mobile tap)
@@ -98,6 +101,8 @@ juris-desk-plus/
     │   ├── InvoiceModal.tsx
     │   ├── NewMatterModal.tsx    # Create matter
     │   ├── TaskModal.tsx          # Create task
+    │   ├── TemplatePickerModal.tsx # Template picker
+    │   ├── FloatingActions.tsx   # Unified floating stack (create + timer)
     └── pages/
         ├── Login.tsx             # Demo user picker
         ├── Dashboard.tsx         # Role-aware KPIs + matters
@@ -169,6 +174,9 @@ juris-desk-plus/
 | 44 | **W. Admin user management** | `UserFormModal.tsx`, `Admin.tsx` | ✅ |
 | 45 | **Button UI polish** | `index.css` (`.icon-btn`) | ✅ |
 | 49 | **Z2. Reliable print** (new-tab HTML) | `printWindow.ts` | ✅ |
+| 53 | **#7 Matter-level conflict check** | `ConflictCheck.tsx`, `NewMatterModal.tsx`, `conflictCheck.ts` | ✅ |
+| 54 | **#8 Document templates** | `TemplatePickerModal.tsx`, `templates.ts` | ✅ |
+| 55 | **#9 Trust account alerts** | `trustAlerts.ts`, `Billing.tsx`, `Admin.tsx` | ✅ |
 
 ---
 
@@ -432,7 +440,15 @@ Then paste this file.
 | 2026-09-24 | UI — `.icon-btn` classes for consistent icon-button affordance |
 | 2026-09-24 | Fix Z — Print now opens a clean HTML page in a new tab (Chrome print preview fix) |
 | 2026-09-24 | Deployed to Vercel via GitHub — live production URL |
-
+| 2026-09-24 | Accessibility audit + light mode contrast fixes (WCAG AA) |
+| 2026-09-24 | Shadows now theme-aware via CSS variables |
+| 2026-09-25 | Feature 7 — Matter-level conflict check (clients + contacts + matters) with consent workflow |
+| 2026-09-25 | Feature 8 — Document templates with auto-filled titles and version notes |
+| 2026-09-25 | Feature 9 — Trust alerts with configurable threshold + Billing dashboard warning |
+| 2026-09-25 | UI — Consolidated floating buttons into single right-side stack (create + timer) |
+| 2026-09-25 | UI — Toasts moved to top-center to avoid floating action overlap |
+| 2026-09-25 | Accessibility audit — fixed WCAG AA contrast failures in light + dark modes |
+| 2026-09-25 | Accessibility — replaced all `bg-primary text-white` with proper fg or brand tokens |
 
 ---
 
@@ -477,3 +493,49 @@ Then paste this file.
 - Document versioning UI
 - PDF export
 - Edit modes for clients/matters/tasks/expenses
+
+---
+### Design System 
+### Semantic Color Pairs
+
+Each semantic color has three tokens:
+
+- `--success` — brand/vibrant, used for buttons and icons
+- `--success-light` — pale background, used for badges and banners
+- `--success-ink` — text-safe variant, MUST be used for text on `--success-light` backgrounds
+
+**Dark mode:** `-ink` is a lighter shade (still passes on dark tints)  
+**Light mode:** `-ink` is a darker shade (passes 4.5:1 on white and `-light` tints)
+
+**Rule of thumb:** if you're putting text on a `-light` background, always use `-ink`.
+
+### Shadows
+
+All shadows are CSS variables set per theme:
+
+- `--shadow-card` / `--shadow-card-hover` — subtle on light, stronger on dark
+- `--shadow-glow` — red glow, softened in light mode
+- `--shadow-btn` / `--shadow-btn-hover` — button elevation
+- `--shadow-modal` — modal + dropdown elevation
+
+Never use raw `shadow-2xl`, `shadow-lg`, or hard-coded shadow values in components. Use `shadow-modal`, `shadow-card`, or `shadow-glow`.
+
+### Contrast Rules (WCAG 2.1 AA)
+
+- **Text minimum:** 4.5:1 for body text, 3:1 for large text (≥18pt)
+- **Icon minimum:** 3:1 against its background
+- **Primary button text** uses `text-primary-fg` — never `text-white`
+- **Brand button text** uses `text-white` — brand is always crimson and dark enough
+- **Never** use `bg-primary text-white` — primary can be light (dark mode) so white text fails
+
+**Semantic background + text pairing:**
+| Background | Text |
+|-----------|------|
+| `bg-primary` | `text-primary-fg` |
+| `bg-brand` | `text-white` |
+| `bg-danger` | `text-white` |
+| `bg-success-light` | `text-success-ink` |
+| `bg-warning-light` | `text-warning-ink` |
+| `bg-danger-light` | `text-danger-ink` |
+| `bg-info-light` | `text-info-ink` |
+| `bg-brand-light` | `text-brand` |

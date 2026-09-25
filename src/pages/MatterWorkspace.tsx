@@ -8,8 +8,9 @@ import { useState, useRef } from "react";
 import { Upload, UserCheck } from "lucide-react";
 import DelegateModal from "../components/DelegateModal";
 import NewMatterModal from "../components/NewMatterModal";
+import TemplatePickerModal from "../components/TemplatePickerModal";
 import { Pencil } from "lucide-react";
-import { X, CheckCircle2, History, Upload as UploadIcon, Printer } from "lucide-react";
+import { X, CheckCircle2, History, Upload as UploadIcon, Printer, FileText } from "lucide-react";
 import { printWindow } from "../lib/printWindow";
 import type { LegalDocument } from "../types";
 
@@ -33,6 +34,7 @@ export default function MatterWorkspace() {
   const [showEdit, setShowEdit] = useState(false);
   const [versioningDoc, setVersioningDoc] = useState<LegalDocument | null>(null);
   const [historyDoc, setHistoryDoc] = useState<LegalDocument | null>(null);
+  const [showTemplates, setShowTemplates] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const matter = matters.find((m) => m.id === id);
@@ -216,7 +218,7 @@ export default function MatterWorkspace() {
             onClick={() => setTab(t)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition whitespace-nowrap ${
               tab === t
-                ? "border-primary text-primary"
+                ? "border-brand text-text font-semibold"
                 : "border-transparent text-muted hover:text-text"
             }`}
           >
@@ -268,6 +270,17 @@ export default function MatterWorkspace() {
 
       {tab === "Documents" && (
         <div className="space-y-4">
+          {canUpload && (
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                onClick={() => setShowTemplates(true)}
+                className="btn-secondary flex items-center justify-center gap-2"
+              >
+                <FileText size={16} />
+                New from Template
+              </button>
+            </div>
+          )}
           {canUpload && (
             <div
               onDragOver={(e) => {
@@ -403,6 +416,13 @@ export default function MatterWorkspace() {
           </p>
         </div>
       )}
+      {showTemplates && (
+        <TemplatePickerModal
+          matter={matter}
+          onClose={() => setShowTemplates(false)}
+        />
+      )}
+
       {versioningDoc && (
         <UploadVersionModal
           doc={versioningDoc}
@@ -475,18 +495,27 @@ function UploadVersionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4">
-      <div className="bg-elevated w-full md:max-w-md rounded-t-2xl md:rounded-2xl border border-border shadow-modal">
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <div className="flex items-center gap-2">
-            <UploadIcon size={18} className="text-primary" />
-            <h2 className="font-semibold">
-              Upload New Version (v{doc.version + 1})
-            </h2>
-          </div>
-          <button onClick={onClose} className="icon-btn" aria-label="Close">
-            <X size={20} />
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4">
+      <div className="bg-elevated w-full md:max-w-lg rounded-t-2xl md:rounded-2xl border border-border shadow-modal max-h-[85dvh] flex flex-col overflow-hidden">
+        <div className="relative border-b border-border shrink-0">
+          <button
+            onClick={onClose}
+            className="icon-btn absolute top-2.5 right-2.5 z-10"
+            aria-label="Close"
+          >
+            <X size={18} />
           </button>
+          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 p-4 pr-14">
+            <div className="w-8 h-8 rounded-lg bg-primary-light text-primary flex items-center justify-center shrink-0">
+              <UploadIcon size={16} />
+            </div>
+            <div className="min-w-0">
+              <h2 className="font-semibold truncate">
+                Upload New Version (v{doc.version + 1})
+              </h2>
+              <p className="text-xs text-muted truncate">{doc.title}</p>
+            </div>
+          </div>
         </div>
 
         <div className="p-4 space-y-4">
@@ -562,16 +591,27 @@ function VersionHistoryModal({
     ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4">
-      <div className="bg-elevated w-full md:max-w-md rounded-t-2xl md:rounded-2xl border border-border shadow-modal max-h-[80vh] flex flex-col">
-        <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
-          <div className="flex items-center gap-2">
-            <History size={18} className="text-primary" />
-            <h2 className="font-semibold truncate">{doc.title}</h2>
-          </div>
-          <button onClick={onClose} className="icon-btn" aria-label="Close">
-            <X size={20} />
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4">
+      <div className="bg-elevated w-full md:max-w-lg rounded-t-2xl md:rounded-2xl border border-border shadow-modal max-h-[80dvh] flex flex-col overflow-hidden">
+        <div className="relative border-b border-border shrink-0">
+          <button
+            onClick={onClose}
+            className="icon-btn absolute top-2.5 right-2.5 z-10"
+            aria-label="Close"
+          >
+            <X size={18} />
           </button>
+          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 p-4 pr-14">
+            <div className="w-8 h-8 rounded-lg bg-primary-light text-primary flex items-center justify-center shrink-0">
+              <History size={16} />
+            </div>
+            <div className="min-w-0">
+              <h2 className="font-semibold truncate">{doc.title}</h2>
+              <p className="text-xs text-muted">
+                Version history · {versions.length} version{versions.length === 1 ? "" : "s"}
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
@@ -665,20 +705,24 @@ function CloseMatterModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4">
-      <div className="bg-elevated w-full md:max-w-md rounded-t-2xl md:rounded-2xl border border-border shadow-modal">
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 size={18} className="text-primary" />
-            <h2 className="font-semibold">Close Matter</h2>
-          </div>
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4">
+      <div className="bg-elevated w-full md:max-w-md rounded-t-2xl md:rounded-2xl border border-border shadow-modal max-h-[85dvh] flex flex-col overflow-hidden">
+        <div className="relative border-b border-border shrink-0">
           <button
             onClick={onClose}
-            className="text-muted hover:text-text p-1"
+            className="icon-btn absolute top-2.5 right-2.5 z-10"
             aria-label="Close"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
+          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 p-4 pr-14">
+            <div className="w-8 h-8 rounded-lg bg-primary-light text-primary flex items-center justify-center shrink-0">
+              <CheckCircle2 size={16} />
+            </div>
+            <div className="min-w-0">
+              <h2 className="font-semibold truncate">Close Matter</h2>
+            </div>
+          </div>
         </div>
 
         <div className="p-4 space-y-4">

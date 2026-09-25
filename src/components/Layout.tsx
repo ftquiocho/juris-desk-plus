@@ -3,7 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
 import ToastContainer from "./Toast";
-import TimerWidget from "./TimerWidget";
+import FloatingActions from "./FloatingActions";
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -21,7 +21,7 @@ export default function Layout() {
 
       {sidebarOpen && (
         <div
-          className="no-print fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"
+          className="no-print fixed inset-0 bg-black/50 backdrop-blur-sm z-30 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -37,7 +37,7 @@ export default function Layout() {
         </main>
       </div>
       <ToastContainer />
-      <TimerWidget />
+      <FloatingActions />
     </div>
   );
 }

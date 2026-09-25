@@ -62,7 +62,7 @@ export default function UserMenu() {
           </p>
           <p className="text-xs text-muted leading-tight">{currentUser.title}</p>
         </div>
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary-dark text-white flex items-center justify-center font-semibold text-xs shadow-glow">
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand to-brand-dark text-white flex items-center justify-center font-semibold text-xs">
           {initials}
         </div>
         <ChevronDown
@@ -82,7 +82,7 @@ export default function UserMenu() {
               Signed in as
             </p>
             <div className="flex items-center gap-3 px-2 py-1.5">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary-dark text-white flex items-center justify-center font-semibold text-xs shrink-0">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand to-brand-dark text-white flex items-center justify-center font-semibold text-xs shrink-0">
                 {initials}
               </div>
               <div className="min-w-0">
@@ -116,7 +116,7 @@ export default function UserMenu() {
                       <div
                         className={`w-7 h-7 rounded-full text-[10px] font-semibold flex items-center justify-center shrink-0 ${
                           isCurrent
-                            ? "bg-primary text-white"
+                            ? "bg-brand text-white"
                             : "bg-surface-hover text-muted"
                         }`}
                       >

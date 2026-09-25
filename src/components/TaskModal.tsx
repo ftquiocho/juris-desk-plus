@@ -81,11 +81,11 @@ export default function TaskModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4">
       <div className="bg-elevated w-full md:max-w-lg rounded-t-2xl md:rounded-2xl border border-border shadow-modal">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-2">
-            <CheckSquare size={18} className="text-primary" />
+            <CheckSquare size={18} className="text-brand" />
             <h2 className="font-semibold">{editing ? "Edit Task" : "New Task"}</h2>
           </div>
           <button onClick={onClose} className="text-muted hover:text-text p-1" aria-label="Close">

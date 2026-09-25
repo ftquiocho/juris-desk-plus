@@ -64,7 +64,7 @@ export default function DelegateModal({
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-2">
-            <UserCheck size={18} className="text-primary" />
+            <UserCheck size={18} className="text-brand" />
             <h2 className="font-semibold">Delegate Matter</h2>
           </div>
           <button

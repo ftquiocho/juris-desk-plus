@@ -9,6 +9,7 @@ import {
   tasks,
   users as seedUsers,
   contacts as seedContacts,
+  seedAuditLog,
 } from "../data";
 import type {
   User,
@@ -53,6 +54,7 @@ interface StoreState {
     pausedMs: number;
     pausedAt: number | null;
   };
+  trustThreshold: number;
 
   setCurrentUser: (user: User | null) => void;
   addClient: (client: Client) => void;
@@ -114,7 +116,7 @@ export const useStore = create<StoreState>((set, get) => ({
   timeEntries,
   invoices,
   trustTransactions,
-  auditLog: [],
+  auditLog: seedAuditLog,
   delegations: [],
   reconciliations: [],
   billedTimeEntryIds: [],
@@ -132,6 +134,7 @@ export const useStore = create<StoreState>((set, get) => ({
     pausedMs: 0,
     pausedAt: null,
   },
+  trustThreshold: 50000,
 
   setCurrentUser: (user) => set({ currentUser: user }),
   addClient: (client) => set((s) => ({ clients: [...s.clients, client] })),

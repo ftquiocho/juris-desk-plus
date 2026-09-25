@@ -31,7 +31,7 @@ export default function Admin() {
             onClick={() => setTab(t)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition whitespace-nowrap ${
               tab === t
-                ? "border-primary text-primary"
+                ? "border-brand text-text font-semibold"
                 : "border-transparent text-muted hover:text-text"
             }`}
           >
@@ -104,7 +104,7 @@ function UsersTab() {
       <div className="card !p-0 overflow-hidden">
         <div className="p-4 border-b border-border">
           <h2 className="font-semibold flex items-center gap-2">
-            <UsersIcon size={16} className="text-primary" />
+            <UsersIcon size={16} className="text-brand" />
             Users & Roles
           </h2>
         </div>
@@ -269,7 +269,7 @@ function RatesTab() {
       <div className="card !p-0 overflow-hidden">
         <div className="p-4 border-b border-border">
           <h2 className="font-semibold flex items-center gap-2">
-            <DollarSign size={16} className="text-primary" />
+            <DollarSign size={16} className="text-brand" />
             Rate Card
           </h2>
         </div>
@@ -356,48 +356,92 @@ function FirmSettingsTab() {
   const [name, setName] = useState(firmName);
   const [address, setAddress] = useState("42nd Floor, One Ayala Tower, Makati City");
   const [tin, setTin] = useState("000-123-456-000");
+
+  const trustThreshold = useStore((s) => s.trustThreshold);
+  const setState = useStore.setState;
+  const [threshold, setThreshold] = useState(String(trustThreshold));
+
   const push = useToast((s) => s.push);
 
+  const saveThreshold = () => {
+    const v = parseFloat(threshold);
+    if (isNaN(v) || v < 0) {
+      push("Threshold must be a positive number.", "error");
+      return;
+    }
+    setState({ trustThreshold: v });
+    push(`Trust alert threshold set to ₱${v.toLocaleString()}.`);
+  };
+
   return (
-    <div className="card space-y-4 max-w-2xl">
-      <h2 className="font-semibold flex items-center gap-2">
-        <Settings size={16} className="text-primary" />
-        Firm Profile
-      </h2>
+    <div className="space-y-4 max-w-2xl">
+      <div className="card space-y-4">
+        <h2 className="font-semibold flex items-center gap-2">
+          <Settings size={16} className="text-brand" />
+          Firm Profile
+        </h2>
 
-      <div>
-        <label className="label">Firm Name</label>
-        <input
-          className="input"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        <div>
+          <label className="label">Firm Name</label>
+          <input
+            className="input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="label">Address</label>
+          <input
+            className="input"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="label">TIN</label>
+          <input
+            className="input"
+            value={tin}
+            onChange={(e) => setTin(e.target.value)}
+          />
+        </div>
+
+        <button
+          onClick={() => push("Firm profile saved (demo).")}
+          className="btn-primary"
+        >
+          Save Changes
+        </button>
       </div>
 
-      <div>
-        <label className="label">Address</label>
-        <input
-          className="input"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-        />
-      </div>
+      <div className="card space-y-4">
+        <h2 className="font-semibold flex items-center gap-2">
+          <DollarSign size={16} className="text-brand" />
+          Trust Alert Threshold
+        </h2>
+        <p className="text-xs text-muted">
+          Alert the billing team when a client's trust balance drops below this
+          amount. CPRA Canon 16 hygiene — keeps client funds topped up and
+          avoids disputes.
+        </p>
 
-      <div>
-        <label className="label">TIN</label>
-        <input
-          className="input"
-          value={tin}
-          onChange={(e) => setTin(e.target.value)}
-        />
-      </div>
+        <div>
+          <label className="label">Threshold (₱)</label>
+          <input
+            type="number"
+            min="0"
+            className="input"
+            value={threshold}
+            onChange={(e) => setThreshold(e.target.value)}
+          />
+        </div>
 
-      <button
-        onClick={() => push("Firm profile saved (demo).")}
-        className="btn-primary"
-      >
-        Save Changes
-      </button>
+        <button onClick={saveThreshold} className="btn-primary">
+          Save Threshold
+        </button>
+      </div>
     </div>
   );
 }

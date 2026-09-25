@@ -13,6 +13,7 @@ export default function InvoiceModal({ onClose }: { onClose: () => void }) {
   const billedTimeEntryIds = useStore((s) => s.billedTimeEntryIds);
   const billedExpenseIds = useStore((s) => s.billedExpenseIds);
   const createInvoice = useStore((s) => s.createInvoice);
+  const addTrustTransaction = useStore((s) => s.addTrustTransaction);
   const addAuditEvent = useStore((s) => s.addAuditEvent);
   const user = useStore((s) => s.currentUser)!;
   const push = useToast((s) => s.push);
@@ -123,6 +124,19 @@ export default function InvoiceModal({ onClose }: { onClose: () => void }) {
       unbilledExpenses.map((e) => e.id)
     );
 
+    // Debit trust immediately so balance reflects the applied amount
+    if (trustNum > 0) {
+      addTrustTransaction({
+        id: `TR-${Date.now()}`,
+        clientId,
+        date: new Date().toISOString().slice(0, 10),
+        reference: `INV-${invoice.id}`,
+        description: `Applied to ${invoice.id}`,
+        debit: trustNum,
+        credit: 0,
+      });
+    }
+
     addAuditEvent({
       id: `LOG-${Date.now()}`,
       userId: user.id,
@@ -138,11 +152,11 @@ export default function InvoiceModal({ onClose }: { onClose: () => void }) {
   const totalLineItems = unbilledEntries.length + unbilledExpenses.length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4">
       <div className="bg-elevated w-full md:max-w-3xl rounded-t-2xl md:rounded-2xl border border-border shadow-modal max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-2">
-            <Calculator size={18} className="text-primary" />
+            <Calculator size={18} className="text-brand" />
             <h2 className="font-semibold">Generate Invoice</h2>
           </div>
           <button
@@ -341,7 +355,7 @@ export default function InvoiceModal({ onClose }: { onClose: () => void }) {
                   </div>
                   <div className="flex justify-between border-t border-border pt-2 mt-2 font-semibold text-base">
                     <span>Total Due</span>
-                    <span className="text-primary">
+                    <span className="text-brand">
                       ₱{total.toLocaleString()}
                     </span>
                   </div>

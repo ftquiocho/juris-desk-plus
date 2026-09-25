@@ -108,11 +108,11 @@ export default function ImportClientsModal({ onClose }: { onClose: () => void })
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 backdrop-blur-sm p-0 md:p-4">
       <div className="bg-elevated w-full md:max-w-4xl rounded-t-2xl md:rounded-2xl border border-border shadow-modal max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
           <div className="flex items-center gap-2">
-            <Upload size={18} className="text-primary" />
+            <Upload size={18} className="text-brand" />
             <h2 className="font-semibold">Import Clients from CSV</h2>
           </div>
           <button
@@ -156,7 +156,7 @@ export default function ImportClientsModal({ onClose }: { onClose: () => void })
                     const f = e.target.files?.[0];
                     if (f) handleFile(f);
                   }}
-                  className="input cursor-pointer file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-medium file:bg-primary file:text-white hover:file:bg-primary-hover"
+                  className="input cursor-pointer file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-medium file:bg-brand file:text-white hover:file:bg-brand-hover"
                 />
                 <p className="text-xs text-muted mt-2">
                   Max 5,000 rows per import. Duplicate client names will be

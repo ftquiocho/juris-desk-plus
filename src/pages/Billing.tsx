@@ -16,6 +16,7 @@ import {
   Printer,
 } from "lucide-react";
 import { printWindow } from "../lib/printWindow";
+import { lowBalanceClients } from "../lib/trustAlerts";
 
 const tabs = ["Overview", "Invoices", "Trust Ledger", "Rate Card", "Reconciliation"] as const;
 
@@ -30,12 +31,13 @@ export default function Billing() {
   const billedTimeEntryIds = useStore((s) => s.billedTimeEntryIds);
   const addReconciliation = useStore((s) => s.addReconciliation);
   const updateInvoiceStatus = useStore((s) => s.updateInvoiceStatus);
-  const addTrustTransaction = useStore((s) => s.addTrustTransaction);
   const addAuditEvent = useStore((s) => s.addAuditEvent);
   const user = useStore((s) => s.currentUser)!;
   const storeUsers = useStore((s) => s.users);
   const push = useToast((s) => s.push);
   const loading = useDelayedLoading();
+  const trustThreshold = useStore((s) => s.trustThreshold);
+  const lowBalances = lowBalanceClients(trustTransactions, clients, trustThreshold);
 
   const unbilled = timeEntries.filter(
     (t) => t.billable && !billedTimeEntryIds.includes(t.id)
@@ -103,22 +105,6 @@ export default function Billing() {
   };
 
   const handleRecordPayment = (invoiceId: string) => {
-    const inv = invoices.find((i) => i.id === invoiceId);
-    if (!inv) return;
-
-    // If trust was applied, record a trust debit
-    if (inv.trustApplied > 0) {
-      addTrustTransaction({
-        id: `TR-${Date.now()}`,
-        clientId: inv.clientId,
-        date: new Date().toISOString().slice(0, 10),
-        reference: `PAY-${inv.id}`,
-        description: `Applied to ${inv.id}`,
-        debit: inv.trustApplied,
-        credit: 0,
-      });
-    }
-
     updateInvoiceStatus(invoiceId, "Paid");
     addAuditEvent({
       id: `LOG-${Date.now()}`,
@@ -228,7 +214,7 @@ export default function Billing() {
             onClick={() => setTab(t)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition whitespace-nowrap ${
               tab === t
-                ? "border-primary text-primary"
+                ? "border-brand text-text font-semibold"
                 : "border-transparent text-muted hover:text-text"
             }`}
           >
@@ -261,6 +247,44 @@ export default function Billing() {
               <div className="card">
                 <p className="text-xs uppercase text-muted">Active Invoices</p>
                 <p className="text-2xl font-bold mt-2">{invoices.length}</p>
+              </div>
+            </div>
+          )}
+          {lowBalances.length > 0 && (
+            <div className="rounded-xl border border-warning/40 bg-warning-light p-4 md:p-5 border-l-4 border-l-warning">
+              <div className="flex items-start gap-3">
+                <AlertTriangle
+                  size={18}
+                  className="text-warning-ink shrink-0 mt-0.5"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-sm text-warning-ink">
+                    Low trust balance — {lowBalances.length} client
+                    {lowBalances.length === 1 ? "" : "s"}
+                  </p>
+                  <p className="text-xs text-muted mt-1">
+                    Below ₱{trustThreshold.toLocaleString()}. Request top-up or
+                    apply unapplied funds.
+                  </p>
+                  <ul className="mt-2 space-y-1">
+                    {lowBalances.slice(0, 3).map(({ client, balance }) => (
+                      <li
+                        key={client.id}
+                        className="flex items-center justify-between text-sm gap-3"
+                      >
+                        <span className="truncate">{client.name}</span>
+                        <span className="font-mono text-xs text-warning-ink shrink-0">
+                          ₱{balance.toLocaleString()}
+                        </span>
+                      </li>
+                    ))}
+                    {lowBalances.length > 3 && (
+                      <li className="text-xs text-muted">
+                        +{lowBalances.length - 3} more
+                      </li>
+                    )}
+                  </ul>
+                </div>
               </div>
             </div>
           )}
@@ -392,7 +416,7 @@ export default function Billing() {
         <div className="card !p-0 overflow-hidden">
           <div className="p-4 border-b border-border">
             <h2 className="font-semibold flex items-center gap-2">
-              <DollarSign size={16} className="text-primary" />
+              <DollarSign size={16} className="text-brand" />
               Firm Rate Card
             </h2>
             <p className="text-xs text-muted mt-1">

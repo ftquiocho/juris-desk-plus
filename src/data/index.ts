@@ -7,3 +7,4 @@ export { invoices } from "./invoices";
 export { trustTransactions } from "./trust";
 export { tasks } from "./tasks";
 export { contacts } from "./contacts";
+export { seedAuditLog } from "./auditSeed";

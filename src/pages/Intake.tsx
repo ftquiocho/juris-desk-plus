@@ -161,7 +161,7 @@ export default function Intake() {
   return (
     <div className="max-w-3xl pb-24">
       <div className="flex items-center gap-3 mb-1">
-        <FileText size={22} className="text-primary" />
+        <FileText size={22} className="text-brand" />
         <h1 className="text-xl md:text-2xl font-bold">
           Form No. 9 — Client Engagement
         </h1>

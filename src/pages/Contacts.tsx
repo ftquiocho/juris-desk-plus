@@ -100,7 +100,7 @@ export default function Contacts() {
             onClick={() => setType(t)}
             className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition border ${
               type === t
-                ? "bg-primary text-white border-primary"
+                ? "bg-brand text-white border-brand"
                 : "bg-surface text-muted border-border hover:bg-surface-hover hover:border-edge"
             }`}
           >
