@@ -79,6 +79,12 @@ interface StoreState {
   updateTaskStatus: (id: string, status: Task["status"]) => void;
   addExpense: (expense: Expense) => void;
   updateUserRate: (userId: string, rate: number) => void;
+  bulkRemoveClients: (ids: string[]) => void;
+  bulkUpdateClients: (ids: string[], patch: Partial<Client>) => void;
+  bulkRemoveMatters: (ids: string[]) => void;
+  bulkUpdateMatters: (ids: string[], patch: Partial<Matter>) => void;
+  bulkRemoveTasks: (ids: string[]) => void;
+  bulkUpdateTasks: (ids: string[], patch: Partial<Task>) => void;
   updateClient: (client: Client) => void;
   updateMatter: (matter: Matter) => void;
   updateTask: (id: string, patch: Partial<Task>) => void;
@@ -208,6 +214,24 @@ export const useStore = create<StoreState>((set, get) => ({
     set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
   removeExpense: (id) =>
     set((s) => ({ expenses: s.expenses.filter((e) => e.id !== id) })),
+  bulkRemoveClients: (ids) =>
+    set((s) => ({ clients: s.clients.filter((c) => !ids.includes(c.id)) })),
+  bulkUpdateClients: (ids, patch) =>
+    set((s) => ({
+      clients: s.clients.map((c) => (ids.includes(c.id) ? { ...c, ...patch } : c)),
+    })),
+  bulkRemoveMatters: (ids) =>
+    set((s) => ({ matters: s.matters.filter((m) => !ids.includes(m.id)) })),
+  bulkUpdateMatters: (ids, patch) =>
+    set((s) => ({
+      matters: s.matters.map((m) => (ids.includes(m.id) ? { ...m, ...patch } : m)),
+    })),
+  bulkRemoveTasks: (ids) =>
+    set((s) => ({ tasks: s.tasks.filter((t) => !ids.includes(t.id)) })),
+  bulkUpdateTasks: (ids, patch) =>
+    set((s) => ({
+      tasks: s.tasks.map((t) => (ids.includes(t.id) ? { ...t, ...patch } : t)),
+    })),
   addNotification: (notif) =>
     set((s) => ({ notifications: [notif, ...s.notifications] })),
   markNotificationRead: (id) =>

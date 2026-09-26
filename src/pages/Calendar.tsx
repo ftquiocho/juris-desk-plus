@@ -225,7 +225,7 @@ export default function Calendar() {
             <button
               onClick={() => setView("list")}
               className={`p-1.5 rounded-md transition ${
-                view === "list" ? "bg-primary text-white" : "text-muted hover:text-text"
+                view === "list" ? "bg-primary text-black" : "text-muted hover:text-text"
               }`}
               aria-label="List view"
               title="List view"
@@ -235,7 +235,7 @@ export default function Calendar() {
             <button
               onClick={() => setView("calendar")}
               className={`p-1.5 rounded-md transition ${
-                view === "calendar" ? "bg-primary text-white" : "text-muted hover:text-text"
+                view === "calendar" ? "bg-primary text-black" : "text-muted hover:text-text"
               }`}
               aria-label="Calendar view"
               title="Calendar view"
@@ -327,7 +327,7 @@ function ListView({ matters }: { matters: Matter[] }) {
             className="card card-hover flex items-center justify-between gap-3"
           >
             <div className="flex items-center gap-3 md:gap-4 min-w-0">
-              <div className="w-12 h-12 md:w-14 md:h-14 rounded-lg bg-primary text-white flex flex-col items-center justify-center shrink-0">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-lg bg-primary text-black flex flex-col items-center justify-center shrink-0">
                 <span className="text-[10px] md:text-xs uppercase">
                   {d.toLocaleString("en", { month: "short" })}
                 </span>
@@ -405,7 +405,7 @@ function CalendarGrid({
                 <span
                   className={`text-xs md:text-sm font-medium ${
                     isToday
-                      ? "bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center"
+                      ? "bg-primary text-black w-6 h-6 rounded-full flex items-center justify-center"
                       : "text-text"
                   }`}
                 >

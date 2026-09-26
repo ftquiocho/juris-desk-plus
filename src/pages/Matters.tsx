@@ -14,7 +14,13 @@ import {
   ArrowUpDown,
   ChevronUp,
   ChevronDown,
+  Download,
+  Trash2,
 } from "lucide-react";
+import { useRowSelection } from "../hooks/useRowSelection";
+import BulkActionBar from "../components/BulkActionBar";
+import BulkDeleteConfirm from "../components/BulkDeleteConfirm";
+import { exportRowsToCsv } from "../components/BulkExportCsv";
 
 const statusFilters = ["All", "Open", "On Hold", "Closed"] as const;
 
@@ -25,6 +31,9 @@ export default function Matters() {
   const matters = useStore((s) => s.matters);
   const currentUser = useStore((s) => s.currentUser)!;
   const loading = useDelayedLoading();
+  const bulkRemoveMatters = useStore((s) => s.bulkRemoveMatters);
+  const bulkUpdateMatters = useStore((s) => s.bulkUpdateMatters);
+  const addAuditEvent = useStore((s) => s.addAuditEvent);
 
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<(typeof statusFilters)[number]>("All");
@@ -33,6 +42,7 @@ export default function Matters() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
   const [showNew, setShowNew] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const canCreate =
     currentUser.roles.includes("ATTORNEY") ||
@@ -77,6 +87,80 @@ export default function Matters() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const pageClamped = Math.min(page, totalPages);
   const paged = filtered.slice((pageClamped - 1) * perPage, pageClamped * perPage);
+  const visibleIds = paged.map((m) => m.id);
+  const selection = useRowSelection(visibleIds);
+
+  const handleBulkExport = () => {
+    const rows = matters
+      .filter((m) => selection.selected.has(m.id))
+      .map((m) => ({
+        id: m.id,
+        title: m.title,
+        client: clients.find((c) => c.id === m.clientId)?.name ?? "",
+        matterType: m.matterType,
+        status: m.status,
+        court: m.court ?? "",
+        nextHearing: m.nextHearing ?? "",
+        billingType: m.billingType,
+        openedAt: m.openedAt,
+      }));
+    exportRowsToCsv("matters", rows);
+    addAuditEvent({
+      id: `LOG-${Date.now()}`,
+      userId: currentUser.id,
+      action: `Exported ${rows.length} matters to CSV`,
+      target: "bulk-export",
+      timestamp: new Date().toISOString(),
+    });
+    selection.clear();
+  };
+
+  const handleBulkDelete = () => {
+    const ids = Array.from(selection.selected);
+    bulkRemoveMatters(ids);
+    ids.forEach((id) => {
+      addAuditEvent({
+        id: `LOG-${Date.now()}-${id}`,
+        userId: currentUser.id,
+        action: "Deleted matter",
+        target: id,
+        timestamp: new Date().toISOString(),
+      });
+    });
+    setConfirmDelete(false);
+    selection.clear();
+  };
+
+  const handleBulkStatus = (status: "Open" | "On Hold" | "Closed") => {
+    const ids = Array.from(selection.selected);
+    bulkUpdateMatters(ids, { status });
+    ids.forEach((id) => {
+      addAuditEvent({
+        id: `LOG-${Date.now()}-${id}`,
+        userId: currentUser.id,
+        action: `Set status to ${status}`,
+        target: id,
+        timestamp: new Date().toISOString(),
+      });
+    });
+    selection.clear();
+  };
+
+  const handleBulkAssign = (attorneyId: string) => {
+    if (!attorneyId) return;
+    const ids = Array.from(selection.selected);
+    bulkUpdateMatters(ids, { attorneyId });
+    ids.forEach((id) => {
+      addAuditEvent({
+        id: `LOG-${Date.now()}-${id}`,
+        userId: currentUser.id,
+        action: `Reassigned matter`,
+        target: id,
+        timestamp: new Date().toISOString(),
+      });
+    });
+    selection.clear();
+  };
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(sortDir === "asc" ? "desc" : "asc");
@@ -176,6 +260,18 @@ export default function Matters() {
               <table className="w-full text-sm">
                 <thead className="bg-surface border-b border-border">
                   <tr className="text-left text-muted text-xs uppercase tracking-wider">
+                    <th className="py-3 px-4 w-10">
+                      <input
+                        type="checkbox"
+                        checked={selection.allSelected}
+                        ref={(el) => {
+                          if (el) el.indeterminate = selection.someSelected;
+                        }}
+                        onChange={selection.toggleAll}
+                        aria-label="Select all"
+                        className="cursor-pointer"
+                      />
+                    </th>
                     <th
                       className="py-3 px-4 cursor-pointer hover:text-text select-none"
                       onClick={() => handleSort("title")}
@@ -212,8 +308,21 @@ export default function Matters() {
                     return (
                       <tr
                         key={m.id}
-                        className="border-b border-border hover:bg-surface-hover transition-colors"
+                        className={`border-b border-border transition-colors ${
+                          selection.isSelected(m.id)
+                            ? "bg-brand-light/30"
+                            : "hover:bg-surface-hover"
+                        }`}
                       >
+                        <td className="py-3 px-4">
+                          <input
+                            type="checkbox"
+                            checked={selection.isSelected(m.id)}
+                            onChange={() => selection.toggle(m.id)}
+                            aria-label={`Select ${m.title}`}
+                            className="cursor-pointer"
+                          />
+                        </td>
                         <td className="py-3 px-4">
                           <Link
                             to={`/matters/${m.id}`}
@@ -339,6 +448,65 @@ export default function Matters() {
             </div>
           </div>
         </>
+      )}
+
+      <BulkActionBar count={selection.count} onClear={selection.clear}>
+        <button
+          onClick={handleBulkExport}
+          className="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1.5"
+        >
+          <Download size={14} />
+          Export CSV
+        </button>
+
+        <select
+          value=""
+          onChange={(e) =>
+            handleBulkStatus(e.target.value as "Open" | "On Hold" | "Closed")
+          }
+          className="input !w-auto !py-1.5 !text-xs !px-2.5"
+        >
+          <option value="">Status…</option>
+          <option value="Open">Open</option>
+          <option value="On Hold">On Hold</option>
+          <option value="Closed">Closed</option>
+        </select>
+
+        <select
+          value=""
+          onChange={(e) => handleBulkAssign(e.target.value)}
+          className="input !w-auto !py-1.5 !text-xs !px-2.5"
+        >
+          <option value="">Assign attorney…</option>
+          {users
+            .filter(
+              (u) =>
+                u.roles.includes("ATTORNEY") ||
+                u.roles.includes("MNG_PARTNER")
+            )
+            .map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.name}
+              </option>
+            ))}
+        </select>
+
+        <button
+          onClick={() => setConfirmDelete(true)}
+          className="btn-danger text-xs py-1.5 px-3 flex items-center gap-1.5"
+        >
+          <Trash2 size={14} />
+          Delete
+        </button>
+      </BulkActionBar>
+
+      {confirmDelete && (
+        <BulkDeleteConfirm
+          count={selection.count}
+          entityLabel="matter"
+          onConfirm={handleBulkDelete}
+          onCancel={() => setConfirmDelete(false)}
+        />
       )}
 
       {showNew && <NewMatterModal onClose={() => setShowNew(false)} />}

@@ -159,7 +159,7 @@ export default function Dashboard() {
               onClick={() => setView("grid")}
               className={`p-1.5 rounded-md transition ${
                 view === "grid"
-                  ? "bg-primary text-white"
+                  ? "bg-primary text-black"
                   : "text-muted hover:text-text"
               }`}
               aria-label="Grid view"
@@ -171,7 +171,7 @@ export default function Dashboard() {
               onClick={() => setView("list")}
               className={`p-1.5 rounded-md transition ${
                 view === "list"
-                  ? "bg-primary text-white"
+                  ? "bg-primary text-black"
                   : "text-muted hover:text-text"
               }`}
               aria-label="List view"

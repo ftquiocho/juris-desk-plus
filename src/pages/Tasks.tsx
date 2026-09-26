@@ -4,7 +4,10 @@ import { useStore } from "../store/useStore";
 import { users } from "../data";
 import { CheckSquare, Clock, AlertCircle, Plus, Search, Check } from "lucide-react";
 import TaskModal from "../components/TaskModal";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, CheckCheck } from "lucide-react";
+import { useRowSelection } from "../hooks/useRowSelection";
+import BulkActionBar from "../components/BulkActionBar";
+import BulkDeleteConfirm from "../components/BulkDeleteConfirm";
 import { useDelayedLoading } from "../hooks/useDelayedLoading";
 import { SkeletonList } from "../components/Skeleton";
 import type { Task } from "../types";
@@ -23,6 +26,8 @@ export default function Tasks() {
   const matters = useStore((s) => s.matters);
   const updateTaskStatus = useStore((s) => s.updateTaskStatus);
   const addAuditEvent = useStore((s) => s.addAuditEvent);
+  const bulkRemoveTasks = useStore((s) => s.bulkRemoveTasks);
+  const bulkUpdateTasks = useStore((s) => s.bulkUpdateTasks);
   const loading = useDelayedLoading();
 
   const [query, setQuery] = useState("");
@@ -34,6 +39,7 @@ export default function Tasks() {
   );
   const [showNew, setShowNew] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -48,6 +54,72 @@ export default function Tasks() {
       return matchesQuery && matchesStatus && matchesScope;
     });
   }, [tasks, matters, query, status, scope, currentUser.id]);
+
+  const visibleIds = filtered.map((t) => t.id);
+  const selection = useRowSelection(visibleIds);
+
+  const handleBulkDelete = () => {
+    const ids = Array.from(selection.selected);
+    bulkRemoveTasks(ids);
+    ids.forEach((id) => {
+      addAuditEvent({
+        id: `LOG-${Date.now()}-${id}`,
+        userId: currentUser.id,
+        action: "Deleted task",
+        target: id,
+        timestamp: new Date().toISOString(),
+      });
+    });
+    setConfirmDelete(false);
+    selection.clear();
+  };
+
+  const handleBulkStatus = (status: Task["status"]) => {
+    const ids = Array.from(selection.selected);
+    bulkUpdateTasks(ids, { status });
+    ids.forEach((id) => {
+      addAuditEvent({
+        id: `LOG-${Date.now()}-${id}`,
+        userId: currentUser.id,
+        action: `Set task status to ${status}`,
+        target: id,
+        timestamp: new Date().toISOString(),
+      });
+    });
+    selection.clear();
+  };
+
+  const handleBulkPriority = (priority: Task["priority"]) => {
+    const ids = Array.from(selection.selected);
+    bulkUpdateTasks(ids, { priority });
+    ids.forEach((id) => {
+      addAuditEvent({
+        id: `LOG-${Date.now()}-${id}`,
+        userId: currentUser.id,
+        action: `Set priority to ${priority}`,
+        target: id,
+        timestamp: new Date().toISOString(),
+      });
+    });
+    selection.clear();
+  };
+
+  const handleBulkReassign = (assigneeId: string) => {
+    if (!assigneeId) return;
+    const ids = Array.from(selection.selected);
+    bulkUpdateTasks(ids, { assignedTo: assigneeId });
+    ids.forEach((id) => {
+      addAuditEvent({
+        id: `LOG-${Date.now()}-${id}`,
+        userId: currentUser.id,
+        action: `Reassigned task`,
+        target: id,
+        timestamp: new Date().toISOString(),
+      });
+    });
+    selection.clear();
+  };
+
 
   const toggleComplete = (task: Task) => {
     const next = task.status === "Done" ? "To Do" : "Done";
@@ -98,13 +170,13 @@ export default function Tasks() {
           <div className="flex gap-1 border border-border rounded-full p-0.5 shrink-0">
             <button
               onClick={() => setScope("mine")}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition ${scope === "mine" ? "bg-primary text-white" : "text-muted hover:text-text"}`}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition ${scope === "mine" ? "bg-primary text-black" : "text-muted hover:text-text"}`}
             >
               Mine
             </button>
             <button
               onClick={() => setScope("all")}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition ${scope === "all" ? "bg-primary text-white" : "text-muted hover:text-text"}`}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition ${scope === "all" ? "bg-primary text-black" : "text-muted hover:text-text"}`}
             >
               All
             </button>
@@ -140,8 +212,22 @@ export default function Tasks() {
             const assignee = users.find((u) => u.id === t.assignedTo);
             const isDone = t.status === "Done";
             return (
-              <div key={t.id} className="flex items-start justify-between py-3 px-4 gap-3 hover:bg-surface-hover transition-colors">
+              <div
+                key={t.id}
+                className={`flex items-start justify-between py-3 px-4 gap-3 transition-colors ${
+                  selection.isSelected(t.id)
+                    ? "bg-brand-light/30"
+                    : "hover:bg-surface-hover"
+                }`}
+              >
                 <div className="flex items-start gap-3 min-w-0 flex-1">
+                  <input
+                    type="checkbox"
+                    checked={selection.isSelected(t.id)}
+                    onChange={() => selection.toggle(t.id)}
+                    aria-label={`Select ${t.title}`}
+                    className="cursor-pointer mt-1 shrink-0"
+                  />
                   <button
                     onClick={() => toggleComplete(t)}
                     className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition ${
@@ -194,6 +280,75 @@ export default function Tasks() {
             );
           })}
         </div>
+      )}
+
+      <BulkActionBar count={selection.count} onClear={selection.clear}>
+        <select
+          value=""
+          onChange={(e) =>
+            handleBulkStatus(
+              e.target.value as "To Do" | "In Progress" | "Done" | "Blocked"
+            )
+          }
+          className="input !w-auto !py-1.5 !text-xs !px-2.5"
+        >
+          <option value="">Status…</option>
+          <option value="To Do">To Do</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Done">Done</option>
+          <option value="Blocked">Blocked</option>
+        </select>
+
+        <select
+          value=""
+          onChange={(e) =>
+            handleBulkPriority(e.target.value as "Low" | "Medium" | "High")
+          }
+          className="input !w-auto !py-1.5 !text-xs !px-2.5"
+        >
+          <option value="">Priority…</option>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+        </select>
+
+        <select
+          value=""
+          onChange={(e) => handleBulkReassign(e.target.value)}
+          className="input !w-auto !py-1.5 !text-xs !px-2.5"
+        >
+          <option value="">Reassign…</option>
+          {users.map((u) => (
+            <option key={u.id} value={u.id}>
+              {u.name}
+            </option>
+          ))}
+        </select>
+
+        <button
+          onClick={() => handleBulkStatus("Done")}
+          className="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1.5"
+        >
+          <CheckCheck size={14} />
+          Mark Done
+        </button>
+
+        <button
+          onClick={() => setConfirmDelete(true)}
+          className="btn-danger text-xs py-1.5 px-3 flex items-center gap-1.5"
+        >
+          <Trash2 size={14} />
+          Delete
+        </button>
+      </BulkActionBar>
+
+      {confirmDelete && (
+        <BulkDeleteConfirm
+          count={selection.count}
+          entityLabel="task"
+          onConfirm={handleBulkDelete}
+          onCancel={() => setConfirmDelete(false)}
+        />
       )}
 
       {showNew && <TaskModal onClose={() => setShowNew(false)} />}

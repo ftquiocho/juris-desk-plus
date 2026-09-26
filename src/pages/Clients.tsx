@@ -1,3 +1,4 @@
+import { users } from "../data";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useStore } from "../store/useStore";
@@ -6,7 +7,11 @@ import StatusBadge from "../components/StatusBadge";
 import ImportClientsModal from "../components/ImportClientsModal";
 import NewMatterModal from "../components/NewMatterModal";
 import EditClientModal from "../components/EditClientModal";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Download, Trash2 } from "lucide-react";
+import { useRowSelection } from "../hooks/useRowSelection";
+import BulkActionBar from "../components/BulkActionBar";
+import BulkDeleteConfirm from "../components/BulkDeleteConfirm";
+import { exportRowsToCsv } from "../components/BulkExportCsv";
 import { useDelayedLoading } from "../hooks/useDelayedLoading";
 import { SkeletonList } from "../components/Skeleton";
 
@@ -26,6 +31,10 @@ type SortDir = "asc" | "desc";
 export default function Clients() {
   const clients = useStore((s) => s.clients);
   const matters = useStore((s) => s.matters);
+  const bulkRemoveClients = useStore((s) => s.bulkRemoveClients);
+  const bulkUpdateClients = useStore((s) => s.bulkUpdateClients);
+  const addAuditEvent = useStore((s) => s.addAuditEvent);
+  const currentUser = useStore((s) => s.currentUser)!;
   const loading = useDelayedLoading();
 
   const [query, setQuery] = useState("");
@@ -38,6 +47,8 @@ export default function Clients() {
   const [showImport, setShowImport] = useState(false);
   const [newMatterForClient, setNewMatterForClient] = useState<string | null>(null);
   const [editClientId, setEditClientId] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [bulkAssignTo, setBulkAssignTo] = useState("");
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -74,6 +85,82 @@ export default function Clients() {
     (pageClamped - 1) * perPage,
     pageClamped * perPage
   );
+  const visibleIds = paged.map((c) => c.id);
+  const selection = useRowSelection(visibleIds);
+
+  const handleBulkExport = () => {
+    const rows = clients
+      .filter((c) => selection.selected.has(c.id))
+      .map((c) => ({
+        name: c.name,
+        type: c.type,
+        email: c.email,
+        phone: c.phone,
+        caseType: c.caseType,
+        urgency: c.urgency,
+        fileNumber: c.fileNumber ?? "",
+        clientNumber: c.clientNumber ?? "",
+        address: c.address ?? "",
+        nationality: c.nationality ?? "",
+      }));
+    exportRowsToCsv("clients", rows);
+    addAuditEvent({
+      id: `LOG-${Date.now()}`,
+      userId: currentUser.id,
+      action: `Exported ${rows.length} clients to CSV`,
+      target: "bulk-export",
+      timestamp: new Date().toISOString(),
+    });
+    selection.clear();
+  };
+
+  const handleBulkDelete = () => {
+    const ids = Array.from(selection.selected);
+    bulkRemoveClients(ids);
+    ids.forEach((id) => {
+      addAuditEvent({
+        id: `LOG-${Date.now()}-${id}`,
+        userId: currentUser.id,
+        action: "Deleted client",
+        target: id,
+        timestamp: new Date().toISOString(),
+      });
+    });
+    setConfirmDelete(false);
+    selection.clear();
+  };
+
+  const handleBulkAssign = (attorneyName: string) => {
+    if (!attorneyName) return;
+    const ids = Array.from(selection.selected);
+    bulkUpdateClients(ids, { partnersInCharge: attorneyName });
+    ids.forEach((id) => {
+      addAuditEvent({
+        id: `LOG-${Date.now()}-${id}`,
+        userId: currentUser.id,
+        action: `Assigned to ${attorneyName}`,
+        target: id,
+        timestamp: new Date().toISOString(),
+      });
+    });
+    setBulkAssignTo("");
+    selection.clear();
+  };
+
+  const handleBulkUrgency = (urgency: "Low" | "Medium" | "High") => {
+    const ids = Array.from(selection.selected);
+    bulkUpdateClients(ids, { urgency });
+    ids.forEach((id) => {
+      addAuditEvent({
+        id: `LOG-${Date.now()}-${id}`,
+        userId: currentUser.id,
+        action: `Set urgency to ${urgency}`,
+        target: id,
+        timestamp: new Date().toISOString(),
+      });
+    });
+    selection.clear();
+  };
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(sortDir === "asc" ? "desc" : "asc");
@@ -174,6 +261,18 @@ export default function Clients() {
               <table className="w-full text-sm">
                 <thead className="bg-surface border-b border-border">
                   <tr className="text-left text-muted text-xs uppercase tracking-wider">
+                    <th className="py-3 px-4 w-10">
+                      <input
+                        type="checkbox"
+                        checked={selection.allSelected}
+                        ref={(el) => {
+                          if (el) el.indeterminate = selection.someSelected;
+                        }}
+                        onChange={selection.toggleAll}
+                        aria-label="Select all"
+                        className="cursor-pointer"
+                      />
+                    </th>
                     <th
                       className="py-3 px-4 cursor-pointer hover:text-text select-none"
                       onClick={() => handleSort("name")}
@@ -212,10 +311,28 @@ export default function Clients() {
                     return (
                       <tr
                         key={c.id}
-                        className="border-b border-border hover:bg-surface-hover transition-colors cursor-pointer"
-                        onClick={() => setExpandedId(c.id)}
+                        className={`border-b border-border transition-colors ${
+                          selection.isSelected(c.id)
+                            ? "bg-brand-light/30"
+                            : "hover:bg-surface-hover"
+                        }`}
                       >
-                        <td className="py-3 px-4">
+                        <td
+                          className="py-3 px-4"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selection.isSelected(c.id)}
+                            onChange={() => selection.toggle(c.id)}
+                            aria-label={`Select ${c.name}`}
+                            className="cursor-pointer"
+                          />
+                        </td>
+                        <td
+                          className="py-3 px-4 cursor-pointer"
+                          onClick={() => setExpandedId(c.id)}
+                        >
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-primary-light text-primary flex items-center justify-center shrink-0">
                               <Icon size={14} />
@@ -506,9 +623,77 @@ export default function Clients() {
         </div>
       )}
 
+      {/* Bulk Action Bar */}
+      <BulkActionBar count={selection.count} onClear={selection.clear}>
+        <button
+          onClick={handleBulkExport}
+          className="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1.5"
+        >
+          <Download size={14} />
+          Export CSV
+        </button>
+
+        <select
+          value={bulkAssignTo}
+          onChange={(e) => {
+            setBulkAssignTo(e.target.value);
+            handleBulkAssign(e.target.value);
+          }}
+          className="input !w-auto !py-1.5 !text-xs !px-2.5"
+        >
+          <option value="">Assign to…</option>
+          {users
+            .filter(
+              (u) =>
+                u.roles.includes("ATTORNEY") ||
+                u.roles.includes("MNG_PARTNER")
+            )
+            .map((u) => (
+              <option key={u.id} value={u.name}>
+                {u.name}
+              </option>
+            ))}
+        </select>
+
+        <select
+          value=""
+          onChange={(e) =>
+            handleBulkUrgency(e.target.value as "Low" | "Medium" | "High")
+          }
+          className="input !w-auto !py-1.5 !text-xs !px-2.5"
+        >
+          <option value="">Urgency…</option>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+        </select>
+
+        <button
+          onClick={() => setConfirmDelete(true)}
+          className="btn-danger text-xs py-1.5 px-3 flex items-center gap-1.5"
+        >
+          <Trash2 size={14} />
+          Delete
+        </button>
+      </BulkActionBar>
+
+      {confirmDelete && (
+        <BulkDeleteConfirm
+          count={selection.count}
+          entityLabel="client"
+          onConfirm={handleBulkDelete}
+          onCancel={() => setConfirmDelete(false)}
+        />
+      )}
+
       {showImport && (
         <ImportClientsModal onClose={() => setShowImport(false)} />
       )}
+
+      {showImport && (
+        <ImportClientsModal onClose={() => setShowImport(false)} />
+      )}
+
 
       {newMatterForClient && (
         <NewMatterModal
